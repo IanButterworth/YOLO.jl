@@ -39,7 +39,7 @@ function parse_data_config(path::String)
     push!(options,("num_workers"=>"10"))
     lines = readlines(path)
     lines = strip.(lines[.!startswith.(lines,"#")]) # remove comments and get rid of fringe whitespaces
-    lines = lines[lines !== ""] # remove empty lines
+    lines = lines[lines .!== ""] # remove empty lines
     for line in lines
         elems = split(line,"=")
         if length(elems) == 2

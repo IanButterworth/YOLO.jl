@@ -8,7 +8,16 @@ Conversion guidance/strategy:
 ### TODO
 
 - [x] Tidy up dataset and training folder structures
+- [x] Convert dataset download functions to .jl to help generalization
 - [ ] Convert utils
 - [ ] Convert model.py
 - [ ] Create exportable functions
 - [ ] Refactor train and detect examples using exported functions
+
+
+## Downloading a dataset
+Datasets are not included in this package due to their size, but can be downloaded using the provided download scripts.
+
+Coco:
+
+`include("<pkg root>/datasets/coco/get_coco_dataset.jl")`
