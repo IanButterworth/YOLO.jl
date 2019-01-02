@@ -1,10 +1,15 @@
 # FluxYOLOv3
-Minimal implementation of YOLOv3 in Flux
-Based on https://github.com/eriklindernoren/PyTorch-YOLOv3
+Minimal implementation of YOLOv3 in Flux based on https://github.com/eriklindernoren/PyTorch-YOLOv3
+
+### TODO
+
+- [ ] Tidy up dataset and training folder structures
+- [ ] Convert model.py
+- [ ] Create exportable functions
+- [ ] Refactor train and detect examples using exported functions
 
 
 # ORIGINAL README.md below here
-
 
 
 
