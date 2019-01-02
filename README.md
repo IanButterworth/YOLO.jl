@@ -1,9 +1,10 @@
 # FluxYOLOv3
 Minimal implementation of YOLOv3 in Flux
+Based on https://github.com/eriklindernoren/PyTorch-YOLOv3
 
 
 # ORIGINAL README.md below here
-From: https://github.com/eriklindernoren/PyTorch-YOLOv3
+
 
 
 
