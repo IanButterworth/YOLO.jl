@@ -4,7 +4,13 @@
 using Random, Glob, FileIO, DelimitedFiles, OffsetArrays
 using Images, ImageDraw, ImageFiltering, ImageTransformations, Colors
 
+using FreeTypeAbstraction
+
 using Flux
+
+# load a font
+face = newface(string(@__DIR__,"/Hack-Regular.ttf"))
+
 
 # ImageFolder
 mutable struct ImageFolder
@@ -128,18 +134,25 @@ function Base.show(io::IO,x::LabelledImage)
     for i = 1:size(x.filled_labels,1)
         label = x.filled_labels[i,:]
         if sum(label) !== 0.0
-            drawsquare(imview,label[2:5],w,h)
+            lab = string(round(Int,label[1]))
+            drawsquare(imview,label[2:5],w,h,lab)
         end
     end
     display(imview)
 end
 
-function drawsquare(im,bbox::Array{Float64},w,h)
+function drawsquare(im,bbox::Array{Float64},w,h,label)
+    pbbox = getpixelbbox(bbox,w,h)
     corners = getpixelcorners(bbox,w,h)
     draw!(im, LineSegment(Point(corners[1]), Point(corners[2])))
     draw!(im, LineSegment(Point(corners[2]), Point(corners[3])))
     draw!(im, LineSegment(Point(corners[3]), Point(corners[4])))
     draw!(im, LineSegment(Point(corners[4]), Point(corners[1])))
+    try
+        FreeTypeAbstraction.renderstring!(im, string(label), face, (15.0,15.0), corners[4][2], corners[4][1]+1, halign=:hleft,valign=:vtop,bcolor=RGB{Float64}(1.0,1.0,1.0),fcolor=RGB{Float64}(0,0,0))
+    catch e
+        warn("Couldn't draw bbox label due to label falling outside of image bounds")
+    end
 end
 function getpixelbbox(bbox::Array{Float64},w,h)
     return [round(Int,1+(bbox[1]*(w-1))),round(Int,1+(bbox[2]*(h-1))),trunc(Int,(bbox[3]*w)),trunc(Int,(bbox[4]*h))]

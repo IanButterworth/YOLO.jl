@@ -183,6 +183,18 @@ git-tree-sha1 = "b91250044374764e7c29af59a774c4b8d6100b6e"
 uuid = "f6369f11-7733-5829-9624-2563aa707210"
 version = "0.10.1"
 
+[[FreeType]]
+deps = ["BinaryProvider", "Libdl", "Pkg", "Test"]
+git-tree-sha1 = "06462b9d5aca708d764d16e5ba6a83ba7b753d57"
+uuid = "b38be410-82b0-50bf-ab77-7b57e271db43"
+version = "2.1.1"
+
+[[FreeTypeAbstraction]]
+deps = ["ColorVectorSpace", "Colors", "FreeType", "StaticArrays", "Test"]
+git-tree-sha1 = "271ef13438bd0946950fd34d9241e5beefd6d4b3"
+uuid = "663a7486-cb36-511b-a19d-713bb74d65c9"
+version = "0.4.1"
+
 [[Glob]]
 deps = ["Compat", "Test"]
 git-tree-sha1 = "c72f1fcb7d17426de1e8af2e948dfb3de1116eed"
