@@ -43,8 +43,5 @@ run(`unzip -q "instances_train-val2014.zip"`)
 
 PWD = pwd()
 # Set Up Image Lists
-
-writedlm("5k2.txt", map(x->string(PWD,x),readlines("5k.part")))
-
-run(`paste <(awk "{print \"$PWD\"}" <5k.part) 5k.part | tr -d '\t' > 5k.txt`)
-run(`paste <(awk "{print \"$PWD\"}" <trainvalno5k.part) trainvalno5k.part | tr -d '\t' > trainvalno5k.txt`)
+writedlm("5k.txt", map(x->string(PWD,x),readlines("5k.part")))
+writedlm("trainvalno5k.txt", map(x->string(PWD,x),readlines("trainvalno5k.part")))
