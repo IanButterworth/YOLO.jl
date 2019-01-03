@@ -9,7 +9,7 @@ using FreeTypeAbstraction
 using Flux
 
 # load a font
-face = newface(string(@__DIR__,"/Hack-Regular.ttf"))
+face = newface(string(@__DIR__,"/PTM55FT.ttf"))
 
 
 # ImageFolder
@@ -149,7 +149,7 @@ function drawsquare(im,bbox::Array{Float64},w,h,label)
     draw!(im, LineSegment(Point(corners[3]), Point(corners[4])))
     draw!(im, LineSegment(Point(corners[4]), Point(corners[1])))
     try
-        FreeTypeAbstraction.renderstring!(im, string(label), face, (15.0,15.0), corners[4][2], corners[4][1]+1, halign=:hleft,valign=:vtop,bcolor=RGB{Float64}(1.0,1.0,1.0),fcolor=RGB{Float64}(0,0,0))
+        FreeTypeAbstraction.renderstring!(im, string(label), face, (15.0,15.0), corners[4][2], corners[4][1]+1, halign=:hleft,valign=:vtop,bcolor=RGB{Float64}(1.0,1.0,1.0),fcolor=RGB{Float64}(0,0,0)) #use `nothing` to make bcolor transparent
     catch e
         warn("Couldn't draw bbox label due to label falling outside of image bounds")
     end
