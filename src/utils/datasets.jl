@@ -136,12 +136,12 @@ end
 
 function drawsquare(im,bbox::Array{Float64},w,h)
     corners = getpixelcorners(bbox,w,h)
-    draw!(im, LineSegment(corners[1], corners[2]))
-    draw!(im, LineSegment(corners[2], corners[3]))
-    draw!(im, LineSegment(corners[3], corners[4]))
-    draw!(im, LineSegment(corners[4], corners[1]))
+    draw!(im, LineSegment(Point(corners[1]), Point(corners[2])))
+    draw!(im, LineSegment(Point(corners[2]), Point(corners[3])))
+    draw!(im, LineSegment(Point(corners[3]), Point(corners[4])))
+    draw!(im, LineSegment(Point(corners[4]), Point(corners[1])))
 end
-function getpixelbbox(bbox::Array{Float64},w,h) =
+function getpixelbbox(bbox::Array{Float64},w,h)
     return [round(Int,1+(bbox[1]*(w-1))),round(Int,1+(bbox[2]*(h-1))),trunc(Int,(bbox[3]*w)),trunc(Int,(bbox[4]*h))]
 end
 
