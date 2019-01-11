@@ -10,7 +10,7 @@ Coco (~21 GB of zip files):
 `include(joinpath(dirname(dirname(pathof(YOLO))),"datasets/coco/get_coco_dataset.jl"))`
 
 
-## Initialize with a backend (Flux supported. Knet will be added)
+## Initialize with a backend (Flux in progress. Knet pending..)
 ```
 using Flux
 using YOLO
