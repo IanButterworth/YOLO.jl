@@ -9,7 +9,7 @@ using FreeTypeAbstraction
 using Flux
 
 # load a font
-face = newface(string(@__DIR__,"/PTM55FT.ttf"))
+face = newface(string(@__DIR__,"/droid-sans-mono/DroidSansMono.ttf"))
 
 
 # ImageFolder
@@ -135,6 +135,7 @@ function Base.show(io::IO,x::LabelledImage)
         label = x.filled_labels[i,:]
         if sum(label) !== 0.0
             lab = string(round(Int,label[1]))
+            #lab="dsafad"
             drawsquare(imview,label[2:5],w,h,lab)
         end
     end
@@ -149,7 +150,7 @@ function drawsquare(im,bbox::Array{Float64},w,h,label)
     draw!(im, LineSegment(Point(corners[3]), Point(corners[4])))
     draw!(im, LineSegment(Point(corners[4]), Point(corners[1])))
     try
-        FreeTypeAbstraction.renderstring!(im, string(label), face, (15.0,15.0), corners[4][2], corners[4][1]+1, halign=:hleft,valign=:vtop,bcolor=RGB{Float64}(1.0,1.0,1.0),fcolor=RGB{Float64}(0,0,0)) #use `nothing` to make bcolor transparent
+        FreeTypeAbstraction.renderstring!(im, string(label), face, (14,14), corners[4][2], corners[4][1]+1, halign=:hleft,valign=:vtop,bcolor=RGB{Float64}(1.0,1.0,1.0),fcolor=RGB{Float64}(0,0,0)) #use `nothing` to make bcolor transparent
     catch e
         warn("Couldn't draw bbox label due to label falling outside of image bounds")
     end
@@ -157,7 +158,6 @@ end
 function getpixelbbox(bbox::Array{Float64},w,h)
     return [round(Int,1+(bbox[1]*(w-1))),round(Int,1+(bbox[2]*(h-1))),trunc(Int,(bbox[3]*w)),trunc(Int,(bbox[4]*h))]
 end
-
 function getpixelcorners(bbox::Array{Float64},w,h)
     pbbox = getpixelbbox(bbox,w,h)
     topleft =       (clamp(pbbox[1]-trunc(Int,pbbox[3]/2),1,w),clamp(pbbox[2]+trunc(Int,pbbox[4]/2),1,h))
