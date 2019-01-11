@@ -1,4 +1,4 @@
-# FluxYOLOv3.jl
+# YOLO.jl
 # utils/datasets.jl
 
 using Random, Glob, FileIO, DelimitedFiles, OffsetArrays
@@ -6,7 +6,6 @@ using Images, ImageDraw, ImageFiltering, ImageTransformations, Colors
 
 using FreeTypeAbstraction
 
-using Flux
 
 # load a font
 face = newface(string(@__DIR__,"/droid-sans-mono/DroidSansMono.ttf"))

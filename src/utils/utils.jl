@@ -1,5 +1,26 @@
-# FluxYOLOv3.jl
+# YOLO.jl
 # utils/utils.jl
+
+YOLOsrc = dirname(@__DIR__)
+
+"""
+Loads backend handlers
+"""
+function LoadBackendHandlers()
+    ## Backend Handlers
+    if isdefined(Main, :Knet) && isdefined(Main, :Flux)
+        error("Knet and Flux cannot be loaded at the same time. Restart kernel and load either Flux or Knet with `using` before `using YOLO` to load backend handlers.")
+    elseif isdefined(Main, :Knet)
+        include(joinpath(YOLOsrc,"backends/Knet.jl")) #Nested in a `quote` to prevent package missing warnings
+        println("YOLO: Knet backend handlers loaded.")
+    elseif isdefined(Main, :Flux)
+        include(joinpath(YOLOsrc,"backends/Flux.jl")) #Nested in a `quote` to prevent package missing warnings
+        println("YOLO: Flux backend handlers loaded.")
+    else
+        @warn "YOLO: No backend loaded. Restart kernel and load either Flux or Knet with `using` before `using YOLO` to load backend handlers."
+    end
+end
+
 
 """
 Loads class labels at 'path'

@@ -1,9 +1,6 @@
 
-module FluxYOLOv3
+module YOLO
 
-using Flux
-
-include("utils/parse_config.jl")
 include("utils/datasets.jl")
 include("utils/utils.jl")
 
