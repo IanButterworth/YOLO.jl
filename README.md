@@ -16,14 +16,12 @@ using Flux
 using YOLO
 YOLO.LoadBackendHandlers()
 ```
-julia> YOLO: Flux backend handlers loaded.
 
 ## Load a training model
 ```
 YOLOdir = dirname(dirname(pathof(YOLO)))
 m = include(joinpath(YOLOdir,"models/yolov2-tiny/trainingmodel.jl"))
 ```
-julia> #7 (generic function with 1 method)
 
 ## Load and prepare an image
 ```
@@ -35,14 +33,14 @@ im_input[:,:,:,1] = permutedims(collect(channelview(im)),[3,2,1]);
 numClasses = 20
 summary(im_input)
 ```
-julia> "416×416×3×1 Array{Float32,4}"
+"416×416×3×1 Array{Float32,4}"
 
 ## Run model
 ```
 output = m(im_input)
 summary(output)
 ```
-julia> "Tracked 12×12×125×1 Array{Float32,4}"
+"Tracked 12×12×125×1 Array{Float32,4}"
 
 ## Run a pretrained model
 
