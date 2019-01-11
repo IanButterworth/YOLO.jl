@@ -1,6 +1,6 @@
 # CREDIT: https://github.com/pjreddie/darknet/tree/master/scripts/get_coco_dataset.sh
 
-using ZipFile, DelimitedFiles
+using DelimitedFiles
 
 # Set dir to location of this script
 cd(@__DIR__)
