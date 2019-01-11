@@ -7,7 +7,7 @@ Datasets are not included in this package due to their size, but can be download
 
 Coco (~21 GB of zip files):
 
-`include("<pkg root>/datasets/coco/get_coco_dataset.jl")`
+`include(joinpath(dirname(dirname(pathof(YOLO))),"datasets/coco/get_coco_dataset.jl"))`
 
 
 ## Initialize with a backend (Flux supported. Knet will be added)
@@ -19,7 +19,7 @@ YOLO.LoadBackendHandlers()
 
 ## Load a training model
 ```
-YOLOdir = dirname(dirname(Base.pathof(YOLO))); #Run dirname twice to get to package root from /src
+YOLOdir = dirname(dirname(pathof(YOLO)))
 m = include(joinpath(YOLOdir,"models/yolov2-tiny/trainingmodel.jl"))
 ```
 
