@@ -9,11 +9,11 @@
 
 using Flux
 
-YOLOConv(k::NTuple{N,Integer}, ch::Pair{<:Integer,<:Integer}, σ = identity; init = Flux.glorot_uniform,  stride = 1, pad = 0, dilation = 1) where N = Flux.Conv(k, ch, σ, init = init, stride = stride, pad = pad, dilation = dilation)
+Conv(k::NTuple{N,Integer}, ch::Pair{<:Integer,<:Integer}, σ = identity; init = Flux.glorot_uniform,  stride = 1, pad = 0, dilation = 1) where N = Flux.Conv(k, ch, σ, init = init, stride = stride, pad = pad, dilation = dilation)
 
-YOLOBatchNorm(args...) = Flux.BatchNorm(args...)
+BatchNorm(args...) = Flux.BatchNorm(args...)
 
-YOLOMaxPool(x::AbstractArray, k; pad = map(_->0,k), stride = k) = Flux.maxpool(x,k,pad=pad,stride=stride)
+MaxPool(x::AbstractArray, k; pad = map(_->0,k), stride = k) = Flux.maxpool(x,k,pad=pad,stride=stride)
     
 export YOLOConv, YOLOBatchNorm, YOLOMaxPool
 
