@@ -10,7 +10,7 @@ Coco (~21 GB of zip files):
 `include("<pkg root>/datasets/coco/get_coco_dataset.jl")`
 
 
-## Initialize
+## Initialize with a backend (Flux supported. Knet will be added)
 ```
 using Flux
 using YOLO
