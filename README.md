@@ -2,6 +2,14 @@
 Implementation of YOLO Object Detection models in Julia
 Based on https://pjreddie.com/darknet/yolo/
 
+##Known issues
+
+1) yolov2 implements asymmetrical padding, resulting in an output that is `13×13×125×1` rather than `12×12×125×1` that this model gives.
+That means that pretrained models can't be imported. But I'm exploring training this `12×12×125×1` output from scratch
+https://devtalk.nvidia.com/default/topic/1037574/announcements/yolo-object-detection-plugin-for-deepstream-2-0/
+
+
+
 ## Downloading a dataset
 Datasets are not included in this package due to their size, but can be downloaded using the provided download scripts.
 
@@ -42,9 +50,8 @@ summary(output)
 ```
 "Tracked 12×12×125×1 Array{Float32,4}"
 
-## Run a pretrained model
-
-
-## Working with datasets
-
-## Train a model
+## Loss function
+Quality of result is determined by the Intersection of Union (IoU) that can be 
+determined by `bbox_iou` either in the form `bbox_iou(bbox1,bbox2,xywh=true)` 
+where bbox1&2 are in the form xywh. Or as a single 1D array of bbox, where the
+output is a triangular matrix of the unique and non-self comparisons of the array
