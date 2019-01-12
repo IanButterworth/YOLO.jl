@@ -1,26 +1,29 @@
+# Model based on output of ONNX YOLOv2-tiny model
+# https://github.com/onnx/models/tree/master/tiny_yolov2
+
 using Statistics 
 Mul(a,b,c) = b .* reshape(c, (1,1,size(c)[a],1)) 
 Add(axis, A ,B) = A .+ reshape(B, (1,1,size(B)[1],1)) 
 flipkernel(x) = x[end:-1:1, end:-1:1, :, :] 
 
 begin
-    c_1 = YOLO.Conv((1,1),1024=>125, relu, stride=(1, 1), pad=(0, 0), dilation=(1, 1))
+    c_1 = YOLO.Conv((1,1),1024=>125,    relu, stride=(1, 1), pad=(0, 0), dilation=(1, 1))
     c_2 = YOLO.BatchNorm(1024,identity)
-    c_3 = YOLO.Conv((3,3),1024=>1024, relu, stride=(1, 1), pad=(1, 1), dilation=(1, 1))
+    c_3 = YOLO.Conv((3,3),1024=>1024,   relu, stride=(1, 1), pad=(1, 1), dilation=(1, 1))
     c_4 = YOLO.BatchNorm(1024,identity)
-    c_5 = YOLO.Conv((3,3),512=>1024, relu, stride=(1, 1), pad=(1, 1), dilation=(1, 1))
+    c_5 = YOLO.Conv((3,3),512=>1024,    relu, stride=(1, 1), pad=(1, 1), dilation=(1, 1))
     c_6 = YOLO.BatchNorm(512,identity)
-    c_7 = YOLO.Conv((3,3),256=>512, relu, stride=(1, 1), pad=(1, 1), dilation=(1, 1))
+    c_7 = YOLO.Conv((3,3),256=>512,     relu, stride=(1, 1), pad=(1, 1), dilation=(1, 1))
     c_8 = YOLO.BatchNorm(256,identity)
-    c_9 = YOLO.Conv((3,3),128=>256, relu, stride=(1, 1), pad=(1, 1), dilation=(1, 1))
+    c_9 = YOLO.Conv((3,3),128=>256,     relu, stride=(1, 1), pad=(1, 1), dilation=(1, 1))
     c_10 = YOLO.BatchNorm(128,identity)
-    c_11 = YOLO.Conv((3,3),64=>128, relu, stride=(1, 1), pad=(1, 1), dilation=(1, 1))
+    c_11 = YOLO.Conv((3,3),64=>128,     relu, stride=(1, 1), pad=(1, 1), dilation=(1, 1))
     c_12 = YOLO.BatchNorm(64,identity)
-    c_13 = YOLO.Conv((3,3),32=>64, relu, stride=(1, 1), pad=(1, 1), dilation=(1, 1))
+    c_13 = YOLO.Conv((3,3),32=>64,      relu, stride=(1, 1), pad=(1, 1), dilation=(1, 1))
     c_14 = YOLO.BatchNorm(32,identity)
-    c_15 = YOLO.Conv((3,3),16=>32, relu, stride=(1, 1), pad=(1, 1), dilation=(1, 1))
+    c_15 = YOLO.Conv((3,3),16=>32,      relu, stride=(1, 1), pad=(1, 1), dilation=(1, 1))
     c_16 = YOLO.BatchNorm(16,identity)
-    c_17 = YOLO.Conv((3,3),3=>16, relu, stride=(1, 1), pad=(1, 1), dilation=(1, 1))
+    c_17 = YOLO.Conv((3,3),3=>16,       relu, stride=(1, 1), pad=(1, 1), dilation=(1, 1))
     (x_18,)->begin
             edge_19 = x_18 .* 0.003921569f0
             edge_20 = YOLO.MaxPool(broadcast(leakyrelu, c_16(c_17(getindex(reshape(edge_19, size(edge_19, 1), size(edge_19, 2), Int(size(edge_19, 3) / 1), 1, size(edge_19, 4)), Colon(), Colon(), Colon(), 1, Colon()))), 0.1f0), (2, 2), pad=(0, 0), stride=(2, 2))
