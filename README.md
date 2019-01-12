@@ -4,8 +4,7 @@ Based on https://pjreddie.com/darknet/yolo/
 
 ## Known issues
 
-1) yolov2 implements asymmetrical padding, resulting in an output that is `13×13×125×1` rather than `12×12×125×1` that this model gives.
-That means that pretrained models can't be imported. But I'm exploring training this `12×12×125×1` output from scratch
+1) The darknet version of yolov2 uses asymmetrical padding, resulting in an output that is `13×13×125×1` rather than `12×12×125×1` that this model gives. That means that pretrained models can't be imported. But I'm exploring training this `12×12×125×1` output from scratch
 https://devtalk.nvidia.com/default/topic/1037574/announcements/yolo-object-detection-plugin-for-deepstream-2-0/
 
 
