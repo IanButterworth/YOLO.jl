@@ -20,9 +20,8 @@ Coco (~21 GB of zip files):
 
 ## Initialize with a backend (Flux in progress. Knet pending..)
 ```
-using Flux
 using YOLO
-YOLO.LoadBackendHandlers()
+YOLO.LoadBackendHandlers("Flux")
 ```
 
 ## Load a training model
@@ -51,7 +50,10 @@ summary(output)
 "Tracked 12×12×125×1 Array{Float32,4}"
 
 ## Loss function
-Quality of result is determined by the Intersection of Union (IoU) that can be 
+https://medium.com/@jonathan_hui/real-time-object-detection-with-yolo-yolov2-28b1b93e2088
+
+### IoU
+Intersection of Union (IoU) can be 
 determined by `bbox_iou` either in the form `bbox_iou(bbox1,bbox2,xywh=true)` 
 where bbox1&2 are in the form xywh. Or as a single 1D array of bbox, where the
 output is a triangular matrix of the unique and non-self comparisons of the array

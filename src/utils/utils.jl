@@ -6,18 +6,16 @@ YOLOsrc = dirname(@__DIR__)
 """
 Loads backend handlers
 """
-function LoadBackendHandlers()
+function LoadBackendHandlers(backend::String)
     ## Backend Handlers
-    if isdefined(Main, :Knet) && isdefined(Main, :Flux)
-        error("Knet and Flux cannot be loaded at the same time. Restart kernel and load either Flux or Knet with `using` before `using YOLO` to load backend handlers.")
-    elseif isdefined(Main, :Knet)
+    if backend == "Knet"
         include(joinpath(YOLOsrc,"backends/Knet.jl")) #Nested in a `quote` to prevent package missing warnings
         println("YOLO: Knet backend handlers loaded.")
-    elseif isdefined(Main, :Flux)
+    elseif backend == "Flux"
         include(joinpath(YOLOsrc,"backends/Flux.jl")) #Nested in a `quote` to prevent package missing warnings
         println("YOLO: Flux backend handlers loaded.")
     else
-        @warn "YOLO: No backend loaded. Restart kernel and load either Flux or Knet with `using` before `using YOLO` to load backend handlers."
+        @warn "YOLO: Unrecognized backend. Options are Flux or Knet."
     end
 end
 
@@ -65,8 +63,8 @@ function bbox_iou(box1::Array{Float64,1}, box2::Array{Float64,1}; xywh=true)
 end
 
 """
-    Returns a triangular matrix of Intersection of Union (IoU) values for the unique & non-self combinations of an array 
-    of bounding boxes
+    Returns a triangular matrix of Intersection of Union (IoU) values for the unique 
+    & non-self combinations of a single array of bounding boxes
 """
 function bbox_iou(bboxes::Array{Array{Float64,1},1}; xywh=true)
     n = size(bboxes,1)
@@ -74,6 +72,23 @@ function bbox_iou(bboxes::Array{Array{Float64,1},1}; xywh=true)
     for i = 1:n
         for j  = i+1:n
             ious[i,j] = bbox_iou(bboxes[i],bboxes[j],xywh=xywh)
+        end
+    end
+    
+    return ious
+end
+
+"""
+    Returns a 2D array of Intersection of Union (IoU) values for 
+    combinations of two arrays of bounding boxes
+"""
+function bbox_iou(bboxes1::Array{Array{Float64,1},1},bboxes2::Array{Array{Float64,1},1}; xywh=true)
+    n = size(bboxes1,1)
+    m = size(bboxes2,1)
+    ious = zeros(Float64,n,m)
+    for i = 1:n
+        for j  = 1:m
+            ious[i,j] = bbox_iou(bboxes1[i],bboxes2[j],xywh=xywh)
         end
     end
     
