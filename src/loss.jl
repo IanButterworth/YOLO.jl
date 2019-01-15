@@ -12,8 +12,8 @@ sigmoid(x) = 1 / (1 + exp(-x))
 expand_dims(x::Array,axis::Int)
 
 Add a new 1-sized dim at axis value, using python style -ve indexing for positions from end of dims
-i.e.
 
+i.e.
 size(expand_dims(rand(10,24,12),2))
 (10, 1, 24, 12)
 
@@ -47,18 +47,18 @@ end
 
 # Implementation based on https://fairyonice.github.io/Part_4_Object_Detection_with_Yolo_using_VOC_2012_data_loss.html
 
-
 ```
-(BATCH_SIZE, GRID_H, GRID_W, BOX, 2)
+get_cell_grid(gridsize::Tuple{Int,Int},nbatchsize::Int,nboxes::Int)
+
 Helper function to assure that the bounding box x and y are in the grid cell scale
 
 ```
-function get_cell_grid(GRID_W,GRID_H,BATCH_SIZE,BOX)
-    cell_grid = Array{Float64}(undef,BATCH_SIZE,GRID_H,GRID_W,BOX,2)
-    for batch in 1:BATCH_SIZE
-        for gh in 1:GRID_H
-            for gw in 1:GRID_W
-                for box in 1:BOX
+function get_cell_grid(gridsize::Tuple{Int,Int},batchsize::Int,nboxes::Int)
+    cell_grid = Array{Float64}(undef,batchsize,gridsize[1],gridsize[2],nboxes,2)
+    for batch in 1:batchsize
+        for gh in 1:gridsize[1]
+            for gw in 1:gridsize[2]
+                for box in 1:nboxes
                     cell_grid[batch,gh,gw,box,1] =  gw
                     cell_grid[batch,gh,gw,box,2] =  gh
                 end
@@ -95,20 +95,20 @@ pred_box_conf : shape = (N batch, N grid h, N grid w, N anchor, 1), containing c
 
 pred_box_class : shape = (N batch, N grid h, N grid w, N anchor, N class), containing 
 ```
-function adjust_scale_prediction(y_pred, cell_grid, ANCHORS)  
+function adjust_scale_prediction(y_pred::Float32, cell_grid, anchors::Tuple{Float32,Float32})  
 
-    BOX = int(len(ANCHORS)/2)
+    nboxes = length(anchors)
     ## cell_grid is of the shape of 
 
     ### adjust x and y  
     # the bounding box bx and by are rescaled to range between 0 and 1 for given gird.
-    # Since there are BOX x BOX grids, we rescale each bx and by to range between 0 to BOX + 1
+    # Since there are nboxes x nboxes grids, we rescale each bx and by to range between 0 to nboxes + 1
     pred_box_xy = sigmoid.(y_pred[..., :2]) + cell_grid # bx, by
 
     ### adjust w and h
     # exp to make width and height positive
     # rescale each grid to make some anchor "good" at representing certain shape of bounding box 
-    pred_box_wh = exp.(y_pred[..., 2:4]) * np.reshape(ANCHORS,[1,1,1,BOX,2]) # bw, bh
+    pred_box_wh = exp.(y_pred[..., 2:4]) * reshape(anchors,[1,1,1,nboxes]) # bw, bh
 
     ### adjust confidence 
     pred_box_conf = sigmoid.(y_pred[..., 4])# prob bb
@@ -119,12 +119,12 @@ function adjust_scale_prediction(y_pred, cell_grid, ANCHORS)
     return pred_box_xy,pred_box_wh,pred_box_conf,pred_box_class
 end
 
-function extract_ground_truth(y_true)    
-    true_box_xy    = y_true[..., 0:2] # bounding box x, y coordinate in grid cell scale 
-    true_box_wh    = y_true[..., 2:4] # number of cells accross, horizontally and vertically
-    true_box_conf  = y_true[...,4]    # confidence 
-    true_box_class = tf.argmax(y_true[..., 5:], -1)
-    return true_box_xy, true_box_wh, true_box_conf, true_box_class
+function unwrap_bbox_conf_class(y_true::Array{Float32,1})  
+    bbox = y_true[1:4]                  # xywh format bounding box (bbox)
+    conf = y_true[5]                    # confidence 
+    maxval = maximum(y_true[6:end])
+    class = findfirst(a.==maxval)
+    return bbox, conf, class
 end
 
 ```
@@ -206,6 +206,7 @@ function bbox_iou(bbox_true::Array{Float64,1}, bbox_pred::Array{Float64,1}; xywh
     return iou
 end
 
+####### 2 convenience functions.. not sure if these will be helpful though
 """
 Returns a triangular matrix of Intersection of Union (IoU) values for the unique 
 & non-self combinations of a single array of bounding boxes
@@ -238,6 +239,8 @@ function bbox_iou(bboxes_true::Array{Array{Float64,1},1},bboxes_pred::Array{Arra
 
     return ious
 end
+
+#######
 
 
 ```
@@ -282,8 +285,8 @@ end
 best_ious           : tensor of shape (Nbatch, N grid h, N grid w, N anchor)
 true_box_conf       : tensor of shape (Nbatch, N grid h, N grid w, N anchor)
 true_box_conf_IOU   : tensor of shape (Nbatch, N grid h, N grid w, N anchor)
-LAMBDA_NO_OBJECT    : 1.0
-LAMBDA_OBJECT       : 5.0
+λno_object    : 1.0
+λobject       : 5.0
 
 == output ==
 conf_mask : tensor of shape (Nbatch, N grid h, N grid w, N anchor)
@@ -299,12 +302,12 @@ y_true[iframe,igridx,igridy,4] = 0 "and" the predicted region has some object th
 conf_mask[iframe, igridy, igridx, ianchor] =  OBJECT_SCALE
 when there is an object in (grid cell, anchor) pair        
 ```
-function get_conf_mask(best_ious, true_box_conf, true_box_conf_IOU,LAMBDA_NO_OBJECT, LAMBDA_OBJECT)    
+function get_conf_mask(best_ious, true_box_conf, true_box_conf_IOU,λno_object, λobject)    
 
 
-    conf_mask = float32.(best_ious < 0.6) * (1 - true_box_conf) * LAMBDA_NO_OBJECT
+    conf_mask = float32.(best_ious < 0.6) * (1 - true_box_conf) * λno_object
     # penalize the confidence of the boxes, which are reponsible for corresponding ground truth box
-    conf_mask = conf_mask + true_box_conf_IOU * LAMBDA_OBJECT
+    conf_mask = conf_mask + true_box_conf_IOU * λobject
     return conf_mask 
 end
 
@@ -355,32 +358,30 @@ true_boxes
 =========================================
 training parameters specification example 
 =========================================
-GRID_W             = 13
-GRID_H             = 13
-BATCH_SIZE         = 34
-ANCHORS = np.array([1.07709888,  1.78171903,  # anchor box 1, width , height
+gridsize           = (13,13)
+batchsize          = 34
+anchors = np.array([1.07709888,  1.78171903,  # anchor box 1, width , height
 2.71054693,  5.12469308,  # anchor box 2, width,  height
 10.47181473, 10.09646365,  # anchor box 3, width,  height
 5.48531347,  8.11011331]) # anchor box 4, width,  height
-LAMBDA_NO_OBJECT = 1.0
-LAMBDA_OBJECT    = 5.0
-LAMBDA_COORD     = 1.0
-LAMBDA_CLASS     = 1.0
+λno_object = 1.0
+λobject    = 5.0
+λcoord     = 1.0
+λclass     = 1.0
 ```
-function custom_loss_core(y_true,y_pred,true_boxes,GRID_W,GRID_H,BATCH_SIZE,ANCHORS,LAMBDA_COORD,LAMBDA_CLASS,LAMBDA_NO_OBJECT, LAMBDA_OBJECT)
+function custom_loss_core(y_true,y_pred,true_boxes,gridsize::Tuple{Int,Int},batchsize::Int,anchors,λcoord,λclass,λno_object, λobject)
 
-    BOX = int(len(ANCHORS)/2)    
+    nboxes = length(anchors)
+    
     # Step 1: Adjust prediction output
-    cell_grid   = get_cell_grid(GRID_W,GRID_H,BATCH_SIZE,BOX)
-    pred_box_xy, pred_box_wh, pred_box_conf, pred_box_class = adjust_scale_prediction(y_pred,cell_grid,ANCHORS)
+    cell_grid   = get_cell_grid(gridsize,batchsize,nboxes)
+    pred_box_xy, pred_box_wh, pred_box_conf, pred_box_class = adjust_scale_prediction(y_pred,cell_grid,anchors)
     # Step 2: Extract ground truth output
-    true_box_xy, true_box_wh, true_box_conf, true_box_class = extract_ground_truth(y_true)
+    bbox, conf, class = unwrap_bbox_conf_class(y_true)
     # Step 3: Calculate loss for the bounding box parameters
-    loss_xywh, coord_mask = calc_loss_xywh(true_box_conf,LAMBDA_COORD,
-        true_box_xy, pred_box_xy,true_box_wh,pred_box_wh)
+    loss_xywh, coord_mask = calc_loss_xywh(true_box_conf,λcoord,true_box_xy, pred_box_xy,true_box_wh,pred_box_wh)
     # Step 4: Calculate loss for the class probabilities
-    loss_class  = calc_loss_class(true_box_conf,LAMBDA_CLASS,
-        true_box_class,pred_box_class)
+    loss_class  = calc_loss_class(true_box_conf,λclass,true_box_class,pred_box_class)
     # Step 5: For each (grid cell, anchor) pair, 
     #         calculate the IoU between predicted and ground truth bounding box
     true_box_conf_IOU = true_box_conf * bbox_iou(bbox_true,bbox_pred)
@@ -388,16 +389,10 @@ function custom_loss_core(y_true,y_pred,true_boxes,GRID_W,GRID_H,BATCH_SIZE,ANCH
     #         calculate the best IOU, regardless of the ground truth anchor box that each object gets assigned.
     best_ious = calc_IOU_pred_true_best(pred_box_xy,pred_box_wh,true_boxes)
     # Step 7: For each grid cell, calculate the L_{i,j}^{noobj}
-    conf_mask = get_conf_mask(best_ious, true_box_conf, true_box_conf_IOU,LAMBDA_NO_OBJECT, LAMBDA_OBJECT)
+    conf_mask = get_conf_mask(best_ious, true_box_conf, true_box_conf_IOU,λno_object, λobject)
     # Step 8: Calculate loss for the confidence
     loss_conf = calc_loss_conf(conf_mask,true_box_conf_IOU, pred_box_conf)
 
     loss = loss_xywh + loss_conf + loss_class
-    return loss
-end
-
-function custom_loss(y_true, y_pred)
-    loss = custom_loss_core(y_true,y_pred,true_boxes,GRID_W,GRID_H,BATCH_SIZE,ANCHORS,LAMBDA_COORD,LAMBDA_CLASS,LAMBDA_NO_OBJECT, LAMBDA_OBJECT)
-
     return loss
 end

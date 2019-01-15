@@ -6,6 +6,8 @@ using Images, ImageDraw, ImageFiltering, ImageTransformations, Colors
 
 using FreeTypeAbstraction
 
+import Base.length
+
 
 # load a font
 face = newface(string(@__DIR__,"/droid-sans-mono/DroidSansMono.ttf"))
@@ -26,7 +28,7 @@ function loadimagefolder(folder_path::String,img_size::Int)
     files = sort(Glob.glob("*.*",folder_path))
     return ImageFolder(folder_path,img_shape,files)
 end
-function length(ImageFolder::ImageFolder)
+function Base.length(ImageFolder::ImageFolder)
     return length(ImageFolder.files)
 end
 function getitem(ImageFolder::ImageFolder,i::Int64)
