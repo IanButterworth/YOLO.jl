@@ -1,5 +1,0 @@
-*.py linguist-vendored
-*.sh linguist-vendored
-*.weights linguist-vendored
-*.cfg linguist-vendored
-*.png linguist-vendored

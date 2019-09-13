@@ -1,8 +1,11 @@
-*.jl.cov
+## Julia
 *.jl.*.cov
+*.jl.cov
 *.jl.mem
-deps/deps.jl
-datasets/coco/coco/
-datasets/coco/images/
-*.bson
-*.onnx
+.DS_Store
+/Manifest.toml
+/dev/
+/deps/*
+!/deps/build.jl
+*.weights
+/data/datasets/*
