@@ -22,7 +22,7 @@ end
 #loads layers' weights from given file
 function getweights(model, file)
     println("Loading weights")
-    readconstants!(f)
+    readconstants!(file)
     #First Conv layer
     loadconv!(model.layers[1],file,3,3,3,16)
     #Second Conv layer
@@ -80,8 +80,8 @@ end
 
 #read constant and unnecessary numbers from the file
 function readconstants!(file)
-    major  = read(f,Int32)
-    minor = read(f,Int32)
-    revision = read(f,Int32)
-    iseen = read(f,Int32)
+    major  = read(file,Int32)
+    minor = read(file,Int32)
+    revision = read(file,Int32)
+    iseen = read(file,Int32)
 end
