@@ -1,6 +1,0 @@
-classes= 80
-train=datasets/coco/coco/trainvalno5k.txt
-valid=datasets/coco/coco/5k.txt
-names=datasets/coco.names
-backup=backup/
-eval=coco

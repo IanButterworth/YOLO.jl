@@ -7,7 +7,5 @@
 /dev/
 /deps/*
 !/deps/build.jl
-datasets/coco/coco/
-datasets/coco/images/
-*.bson
-*.onnx
+*.weights
+/data/datasets/*
