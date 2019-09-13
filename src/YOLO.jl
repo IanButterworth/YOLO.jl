@@ -15,6 +15,7 @@ const pretrained_dir = joinpath(data_dir,"pretrained")
 const face = newface(joinpath(@__DIR__,"misc","DroidSansMono.ttf")) #Font type
 const xtype=(Knet.gpu()>=0 ? Knet.KnetArray{Float32} : Array{Float32})#if gpu exists run on gpu
 
+include("datasets.jl")
 include("models.jl")
 include("preprocess.jl")
 include("postprocess.jl")
