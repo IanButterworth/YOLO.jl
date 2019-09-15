@@ -7,18 +7,36 @@ using FreeTypeAbstraction
 using LightXML
 using ImageMagick
 
-const models_dir = joinpath(@__DIR__,"models")
-const data_dir = joinpath(@__DIR__,"..","data")
-const datasets_dir = joinpath(data_dir,"datasets")
-const pretrained_dir = joinpath(data_dir,"pretrained")
+include("common.jl")
 
 const face = newface(joinpath(@__DIR__,"misc","DroidSansMono.ttf")) #Font type
 const xtype=(Knet.gpu()>=0 ? Knet.KnetArray{Float32} : Array{Float32})#if gpu exists run on gpu
+
+Base.@kwdef mutable struct YOLOLabel
+    x::Float32 #Left hand edge in scaled image width unnits (0-1)
+    y::Float32 #Right hand edge in scaled image width unnits (0-1)
+    w::Float32 #Width in scaled image width unnits (0-1)
+    h::Float32 #Height in scaled image height unnits (0-1)
+    name::String #Description of object
+    difficult::Int32 #Difficult flag
+end
+
+Base.@kwdef mutable struct LabelledImageDataset
+    name::String
+    objects::Vector{String}
+    objectcounts::Vector{Int32}
+    images_dir::String
+    labels_dir::String
+    image_paths::Array{String} = String[]
+    label_paths::Array{String} = String[]
+    labels::Vector{Vector{YOLOLabel}} = Vector{Vector{YOLOLabel}}(undef,0)
+end
 
 include("datasets.jl")
 include("models.jl")
 include("preprocess.jl")
 include("postprocess.jl")
+
 
 """
     load_v2_tiny_voc(;output_dir::String = "YOLO_output")
@@ -34,10 +52,6 @@ function load_v2_tiny_voc(;output_dir::String = "YOLO_output")
     f = open(weights_file)
     getweights(model,f)
     close(f)
-
-    ## Dataset for validation testing
-    dataset_images_dir = joinpath(datasets_dir,"voc","VOCdevkit","VOC2007","JPEGImages") #Input directory for accuracy calculation
-    dataset_labels_dir = joinpath(datasets_dir,"voc","VOCdevkit","VOC2007","Annotations") #location of objects as Xml file for accuracy calculation
 
 
     EXAMPLE_INPUT = joinpath(output_dir,"example.jpg") #One input for display
@@ -60,7 +74,7 @@ function batchaccuracy()
     inputdir => takes the directory of input for saving output and returns array of directories of the images
     prepareinput => takes the array of directories of the images and returns 416*416*3*totalImage. =#
     #prepare data for accuracy
-    images,labels = inputandlabelsdir(dataset_labels_dir,dataset_images_dir)
+    images,labels = collectLabelImagePairs(dataset_labels_dir,dataset_images_dir)
     inp,out,imgs = prepareinputlabels(images,labels)
     print("input for accuracy:  ")
     println(summary(inp))
@@ -85,7 +99,7 @@ function displayout()
 end
 function saveout()
     #prepare data for saving process
-    indir = inputdir(output_dir)
+    indir = readdir(output_dir)
     inp,images = prepareinput(indir)
     print("input for saving:  ")
     println(summary(inp))

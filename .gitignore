@@ -9,3 +9,4 @@
 !/deps/build.jl
 *.weights
 /data/datasets/*
+!/data/datasets/voc/voc.jl
