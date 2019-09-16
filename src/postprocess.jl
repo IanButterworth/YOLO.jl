@@ -2,12 +2,12 @@
 #Date: 15/08/2019
 
 #process the input and save into given directory
-saveOut(model,data,confth,iouth,res,number; record = true, location = "Output") = (saveOut!(model,args,confth,iouth,res,number; record = record, location = location) for args in data)
+saveOut(model,data,conf_thresh,iou_thresh,res,number; record = true, location = "Output") = (saveOut!(model,args,conf_thresh,iou_thresh,res,number; record = record, location = location) for args in data)
 
-function saveOut!(model,args,confth,iouth,res,number; record = true, location = "Output")
-    out = model(args[1])
-    out = postprocessing(out,confth,iouth)
-    a = out
+function saveOut!(model,args,conf_thresh,iou_thresh,res,number; record = true, location = "Output")
+    yolomat = model(args[1])
+    yolomat = postprocessing(yolomat,conf_thresh,iou_thresh)
+    a = yolomat
     push!(res,a)
     im = args[2][1]
     p2 = 416-length(axes(im)[1][1:end])
@@ -26,13 +26,13 @@ function saveOut!(model,args,confth,iouth,res,number; record = true, location = 
         save(string(location,"/$num.jpg"),im[1:end-p2,1:end-p1])
     end
 end
-#confth => confidence score threshold. 0.3 is recommended
-#iouth => intersection over union threshold. if 2 images overlap more than this threshold, one of them is removed
-function saveoutput(model,data,confth,iouth; record = true, location = "Output")
+#conf_thresh => confidence score threshold. 0.3 is recommended
+#iou_thresh => intersection over union threshold. if 2 images overlap more than this threshold, one of them is removed
+function saveoutput(model,data,conf_thresh,iou_thresh; record = true, location = "Output")
     res = []
     number = [0]
     println("Processing Input and Saving...")
-    progress!(saveOut(model,data,confth,iouth,res,number; record = record, location = location))
+    progress!(saveOut(model,data,conf_thresh,iou_thresh,res,number; record = record, location = location))
     println("Saved all output")
     return res
 end
@@ -51,25 +51,25 @@ function drawsquare(im,x,y,w,h,padding)
 end
 
 #Calculates accuracy for Voc Dataset
-acc(model,data,confth,iouth,iou,predictions) =(acc!(model,args,confth,iouth,iou,predictions) for args in data)
+acc(model,data,conf_thresh,iou_thresh,iou,predictions) =(acc!(model,args,conf_thresh,iou_thresh,iou,predictions) for args in data)
 
-function acc!(model,args,confth,iouth,iou,predictions)
-    out = model(args[1])
-    out = postprocessing(out,confth,iouth)
+function acc!(model,args,conf_thresh,iou_thresh,iou,predictions)
+    yolomat = model(args[1])
+    yolomat = postprocessing(yolomat,conf_thresh,iou_thresh)
     check = zeros(length(args[2][1])-2)
-    sort!(out,by = x-> x[6],rev=true)
-    for k in 1:length(out)
-        tp,loc = istrue(out[k],args[2][1][3:length(args[2][1])],check,iou)
-        push!(predictions[numsdic[out[k][5]]],(tp,out[k][6]))
+    sort!(yolomat,by = x-> x[6],rev=true)
+    for k in 1:length(yolomat)
+        tp,loc = istrue(yolomat[k],args[2][1][3:length(args[2][1])],check,iou)
+        push!(predictions[numsdic[yolomat[k][5]]],(tp,yolomat[k][6]))
         if tp
             check[loc] = 1
         end
     end
 end
-#confth => confidence score threshold. 0.0 for calculating accuracy
-#iouth => intersection over union threshold. if 2 images overlap more than this threshold, one of them is removed
+#conf_thresh => confidence score threshold. 0.0 for calculating accuracy
+#iou_thresh => intersection over union threshold. if 2 images overlap more than this threshold, one of them is removed
 #iou => intersection over union. True positive threshold
-function accuracy(model,data,confth,iouth,iou)
+function accuracy(model,data,conf_thresh,iou_thresh,iou)
     predictions = Dict("aeroplane"=>[],"bicycle"=>[],"bird"=>[], "boat"=>[],
                     "bottle"=>[],"bus"=>[],"car"=>[],"cat"=>[],"chair"=>[],
                     "cow"=>[],"diningtable"=>[],"dog"=>[],"horse"=>[],"motorbike"=>[],
@@ -80,7 +80,7 @@ function accuracy(model,data,confth,iouth,iou)
                     "person"=>0.0,"pottedplant"=>0.0,"sheep"=>0.0,"sofa"=>0.0,"train"=>0.0,"tvmonitor"=>0.0)
 
     println("Calculating accuracy...")
-    progress!(acc(model,data,confth,iouth,iou,predictions))
+    progress!(acc(model,data,conf_thresh,iou_thresh,iou,predictions))
     for key in keys(predictions)
         sort!(predictions[key], by = x ->x[2],rev = true)
         tp = 0
@@ -148,7 +148,7 @@ end
 
 #Displays an image's output on IDE
 function displaytest(file,model; record = false)
-    im, img_size, img_originalsize, padding = loadprepareimage(file,(416,416))
+    im, padding = loadResizePadImageToFit(file,(416,416))
     im_input = Array{Float32}(undef,416,416,3,1)
     im_input[:,:,:,1] = permutedims(collect(channelview(im)),[2,3,1]);
     if gpu() >= 0 im_input = KnetArray(im_input) end
@@ -167,48 +167,48 @@ end
 #post processing function.
 #Confidence score threshold to select correct predictions. Recommended : 0.3
 #IoU threshold to remove unnecessary predictions: Recommended:0.3
-function postprocessing(out,confth,iouth)
-    out = Array{Float32,4}(out)
+function postprocessing(yolomat,conf_thresh,iou_thresh)
+    yolomat = Array{Float32,4}(yolomat)
     result = []
     RATE = 32
     for cy in 1:13
         for cx in 1:13
             for b in 1:5
                 channel = (b-1)*(numClass + 5)
-                tx = out[cy,cx,channel+1,1]
-                ty = out[cy,cx,channel+2,1]
-                tw = out[cy,cx,channel+3,1]
-                th = out[cy,cx,channel+4,1]
-                tc = out[cy,cx,channel+5,1]
+                tx = yolomat[cy,cx,channel+1,1]
+                ty = yolomat[cy,cx,channel+2,1]
+                tw = yolomat[cy,cx,channel+3,1]
+                th = yolomat[cy,cx,channel+4,1]
+                tc = yolomat[cy,cx,channel+5,1]
                 x = (sigmoid(tx) + cx-1) * RATE
                 y = (sigmoid(ty) + cy-1) * RATE
                 w = exp(tw) * anchors[b][1] * RATE
                 h = exp(th) * anchors[b][2] * RATE
                 conf = sigmoid(tc)
-                classScores = out[cy,cx,channel+6:channel+25,1]
+                classScores = yolomat[cy,cx,channel+6:channel+25,1]
                 classScores = softmax(classScores)
                 classNo = argmax(classScores)
                 bestScore = classScores[classNo]
                 classConfidenceScore = conf*bestScore
-                if classConfidenceScore > confth
+                if classConfidenceScore > conf_thresh
                      p = (max(0.0,x-w/2),max(0.0,y-h/2),min(w,416.0),min(h,416.0),classNo,classConfidenceScore)
                      push!(result,p)
                 end
             end
         end
     end
-    result = nonmaxsupression(result,iouth)
+    result = nonmaxsupression(result,iou_thresh)
     return result
 end
 
 #It removes the predictions overlapping.
-function nonmaxsupression(results,iouth)
+function nonmaxsupression(results,iou_thresh)
     sort!(results, by = x ->x[6],rev=true)
     for i in 1:length(results)
         k = i+1
         while k <= length(results)
             if ioumatch(results[i][1],results[i][2],results[i][3],results[i][4],
-                results[k][1],results[k][2],results[k][3],results[k][4]) > iouth && results[i][5] == results[k][5]
+                results[k][1],results[k][2],results[k][3],results[k][4]) > iou_thresh && results[i][5] == results[k][5]
                 deleteat!(results,k)
                 k = k - 1
             end

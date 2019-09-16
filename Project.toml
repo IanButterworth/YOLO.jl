@@ -17,6 +17,8 @@ Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
 Knet = "1902f260-5fb4-5aff-8c31-6271790ab950"
 LightXML = "9c8b4983-aa76-5018-a973-4c85ecc9e179"
 OffsetArrays = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
+ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
+QuartzImageIO = "dca85d43-d64c-5e67-8c65-017450d5d020"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [extras]

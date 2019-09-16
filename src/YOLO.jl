@@ -6,13 +6,14 @@ using Images, ImageDraw, ImageFiltering, ImageTransformations, Colors
 using FreeTypeAbstraction
 using LightXML
 using ImageMagick
+import ProgressMeter
 
 include("common.jl")
 
 const face = newface(joinpath(@__DIR__,"misc","DroidSansMono.ttf")) #Font type
 const xtype=(Knet.gpu()>=0 ? Knet.KnetArray{Float32} : Array{Float32})#if gpu exists run on gpu
 
-Base.@kwdef mutable struct YOLOLabel
+Base.@kwdef mutable struct Label
     x::Float32 #Left hand edge in scaled image width unnits (0-1)
     y::Float32 #Right hand edge in scaled image width unnits (0-1)
     w::Float32 #Width in scaled image width unnits (0-1)
@@ -25,11 +26,25 @@ Base.@kwdef mutable struct LabelledImageDataset
     name::String
     objects::Vector{String}
     objectcounts::Vector{Int32}
+    image_size_lims::Tuple{Int,Int} = (-1,-1)
     images_dir::String
     labels_dir::String
     image_paths::Array{String} = String[]
     label_paths::Array{String} = String[]
-    labels::Vector{Vector{YOLOLabel}} = Vector{Vector{YOLOLabel}}(undef,0)
+    labels::Vector{Vector{Label}} = Vector{Vector{Label}}(undef,0)
+end
+
+Base.@kwdef mutable struct Settings
+    image_shape::Tuple{Int,Int}
+    image_channels::Int
+end
+
+Base.@kwdef mutable struct LoadedDataset
+    imagestack_matrix::Array{Float32}                       #4D image stack of type Float32 (w,h,colorchannels,numimages)
+    paddings::Vector{Array{Int}}
+    #label #labels as tupple of arrays. tupples are designed as (ImageWidth, ImageHeight,[x,y,objectWidth,objectHeight],[x,y,objectWidth,objectHeight]..)
+
+    #not finished
 end
 
 include("datasets.jl")
