@@ -1,4 +1,7 @@
 module v2_tiny_voc
+
+import ..flipdict
+
 # 2 dictionaries to access number<->class by O(1)
 const namesdic = Dict("aeroplane"=>1,"bicycle"=>2,"bird"=>3, "boat"=>4,
             "bottle"=>5,"bus"=>6,"car"=>7,"cat"=>8,"chair"=>9,

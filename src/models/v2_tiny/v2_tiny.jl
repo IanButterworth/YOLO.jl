@@ -1,7 +1,8 @@
 module v2_tiny
 #Tiny Yolo V2-tiny model configuration
 
-include(joinpath(@__DIR__,"..","common.jl"))
+import ..sigmoid
+
 include(joinpath(@__DIR__,"loadweights.jl"))
 
 mutable struct Chain

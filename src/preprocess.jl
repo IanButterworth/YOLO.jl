@@ -56,17 +56,18 @@ end
 
 
 function load(ds::LabelledImageDataset, settings::Settings; limitfirst::Int = -1)
-    @info "Loading VOC images into memory (~10 GB)"
+    if limitfirst > 0
+        @info "Loading images from $(ds.name) dataset into memory"
+        numimages = limitfirst
+    else
+        @info "Loading first $numimages images from $(ds.name) dataset into memory"
+        numimages = length(ds.image_paths)
+    end
     kern = resizekern(ds.image_size_lims,settings.image_shape)
 
     firstimg, padding = loadResizePadImageToFit(ds.image_paths[1], settings.image_shape)
     imgsize = size(firstimg)
 
-    if limitfirst > 0 && limitfirst < length(ds.image_paths)
-        numimages = limitfirst
-    else
-        numimages = length(ds.image_paths)
-    end
     lds = LoadedDataset(
         imagestack_matrix = Array{Float32}(undef,imgsize[1],imgsize[2],settings.image_channels,numimages),
         paddings = Vector{Vector{Int}}(undef,0)
@@ -82,83 +83,3 @@ function load(ds::LabelledImageDataset, settings::Settings; limitfirst::Int = -1
     end
     return lds
 end
-
-
-
-# """
-#     prepareinputlabels(inArr,labArr)
-#
-# Takes images and labels directories and returns 3 arrays
-# input as 416*416*3*totalImage and
-# labels as tupple of arrays.
-# tupples are designed as (ImageWidth, ImageHeight,[x,y,objectWidth,objectHeight],[x,y,objectWidth,objectHeight]..)
-# images are padded version of given images.
-# """
-# function prepareinputlabels(inArr,labArr)
-#     in,imgs = prepareinput(inArr)
-#     lab = preparelabels(labArr)
-#     lab = arrangelabels(lab,416)
-#     return in,lab,imgs
-# end
-#
-# prepInput(inRes,imgs,data) =(prepInput!(inRes,imgs,args) for args in data)
-#
-# function prepInput!(inRes,imgs,args)
-#     im, padding = loadResizePadImageToFit(args,(416,416))
-#     im_input = Array{Float32}(undef,416,416,3,1)
-#     im_input[:,:,:,1] = permutedims(collect(channelview(im)),[2,3,1])
-#     push!(inRes,im_input)
-#     push!(imgs,im)
-# end
-#
-# function prepareinput(inArr)
-#     inRes = Array{Array{Float32,4},1}()
-#     imgs= []
-#     println("Pre-processing images")
-#     progress!(prepInput(inRes,imgs,inArr))
-#     println("Pre-processing done")
-#     return cat(inRes...,dims=4),imgs
-# end
-#
-#
-#
-#
-# function preparelabels(labArr)
-#     labRes = []
-#     println("Preparing labels...")
-#     progress!(preplabels(labArr,labRes))
-#     println("Labels are done")
-#     return labRes
-# end
-#
-# arrlabels(lab,size) =(arrlabels!(args,size) for args in lab)
-#
-# function arrlabels!(args,size)
-#     w = args[1]
-#     h = args[2]
-#     for k in 3:length(args)
-#         m = max(w,h)
-#         rate = size/m
-#         if w >= h
-#             pad = floor((size - h*rate)/2)
-#             args[k][1] = floor(args[k][1]*rate)
-#             args[k][2] = floor(args[k][2]*rate) + pad
-#             args[k][3] = floor(args[k][3]*rate)
-#             args[k][4] = floor(args[k][4]*rate)
-#         else
-#             pad = floor((size - w*rate)/2)
-#             args[k][1] = floor(args[k][1]*rate) + pad
-#             args[k][2] = floor(args[k][2]*rate)
-#             args[k][3] = floor(args[k][3]*rate)
-#             args[k][4] = floor(args[k][4]*rate)
-#         end
-#     end
-# end
-# # return all tupples as(ImageWidth, ImageHeight,[x,y,objectWidth,objectHeight],ImageHeight,[x,y,objectWidth,objectHeight]..)
-# function arrangelabels(lab,size)
-#     println("Arranging labels...")
-#     progress!(arrlabels(lab,size))
-#     println("Labels are arranged")
-#     return lab
-# end
-#
