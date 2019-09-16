@@ -17,15 +17,16 @@ end
     @test isfile(joinpath(pretraineddir,"v2_tiny","voc","v2_tiny_voc.weights"))
 end
 
-@testset "Loading VOC dataset" being
+@testset "Loading VOC dataset" begin
     voc = YOLO.VOC.populate()
     @test length(voc.image_paths) == 5011
     @test length(voc.label_paths) == 5011
-    @test voc.objectcounts == 20
+    @test length(voc.objects) == 20
+    @test voc.objectcounts == [306, 353, 486, 290, 505, 229, 1250, 376, 798, 259, 215, 510, 362, 339, 4690, 514, 257, 248, 297, 324]
 
     sets = YOLO.Settings(image_shape=(416,416),image_channels=3)
 
-    vocloaded = YOLO.load(voc, sets)
-    @test size(vocloaded.imagestack_matrix) ==  [416,416,3,5011]
-    @test length(paddings) = 5011
+    vocloaded = YOLO.load(voc, sets, limitfirst=10)
+    @test size(vocloaded.imagestack_matrix) ==  (416,416,3,10)
+    @test length(vocloaded.paddings) == 10
 end

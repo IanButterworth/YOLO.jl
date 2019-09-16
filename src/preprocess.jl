@@ -52,19 +52,24 @@ function resizePadImageToFit(img::Union{Array{RGB4{N0f8}},Array{Gray{N0f8}}}, ta
 end
 
 
-function load(ds::LabelledImageDataset, settings::Settings)
+function load(ds::LabelledImageDataset, settings::Settings; limitfirst::Int = -1)
     @info "Loading VOC images into memory (~10 GB)"
     kern = resizekern(ds.image_size_lims,settings.image_shape)
 
     firstimg, padding = loadResizePadImageToFit(ds.image_paths[1], settings.image_shape)
     imgsize = size(firstimg)
 
+    if limitfirst > 0 && limitfirst < length(ds.image_paths)
+        numimages = limitfirst
+    else
+        numimages = length(ds.image_paths)
+    end
     lds = LoadedDataset(
-        imagestack_matrix = Array{Float32}(undef,imgsize[1],imgsize[2],settings.image_channels,length(ds.image_paths)),
+        imagestack_matrix = Array{Float32}(undef,imgsize[1],imgsize[2],settings.image_channels,numimages),
         paddings = Vector{Vector{Int}}(undef,0)
     )
 
-    ProgressMeter.@showprogress 0.25 "Loading images..." for i in 1:length(ds.image_paths)
+    ProgressMeter.@showprogress 0.25 "Loading images..." for i in 1:numimages
         img = FileIO.load(ds.image_paths[i])
         img_size = size(img)
         target_img_size = sizethatfits(img_size, settings.image_shape)
