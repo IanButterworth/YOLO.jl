@@ -56,12 +56,12 @@ end
 
 
 function load(ds::LabelledImageDataset, settings::Settings; limitfirst::Int = -1)
-    if limitfirst > 0
-        @info "Loading images from $(ds.name) dataset into memory"
+    if limitfirst > 0 && limitfirst < length(ds.image_paths)
         numimages = limitfirst
-    else
         @info "Loading first $numimages images from $(ds.name) dataset into memory"
+    else
         numimages = length(ds.image_paths)
+        @info "Loading all $numimages images from $(ds.name) dataset into memory"
     end
     kern = resizekern(ds.image_size_lims,settings.image_shape)
 
