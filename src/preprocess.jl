@@ -34,7 +34,10 @@ end
 Loads and prepares (resizes + pads) an image to fit within a given shape.
 Returns the image and the padding.
 """
-function resizePadImageToFit(img::Union{Array{RGB4{N0f8}},Array{Gray{N0f8}}}, target_img_size::Tuple{Int,Int}, target_img_shape::Tuple{Int,Int}, kern::Tuple{ImageFiltering.KernelFactors.ReshapedOneD,ImageFiltering.KernelFactors.ReshapedOneD})
+function resizePadImageToFit(img::Array{T}, target_img_size::Tuple{Int,Int},
+        target_img_shape::Tuple{Int,Int},
+        kern::Tuple{ImageFiltering.KernelFactors.ReshapedOneD,ImageFiltering.KernelFactors.ReshapedOneD}) where {T<:ColorTypes.Color}
+
     imgr = ImageTransformations.imresize(ImageFiltering.imfilter(img, kern, NA()), target_img_size)
 
     # Determine top and left padding
