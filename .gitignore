@@ -8,5 +8,4 @@ Manifest.toml
 /deps/*
 !/deps/build.jl
 *.weights
-/data/datasets/*
-!/data/datasets/voc/voc.jl
+/data/datasets/voc/VOCdevkit
