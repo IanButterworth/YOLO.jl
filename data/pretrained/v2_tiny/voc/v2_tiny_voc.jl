@@ -12,7 +12,7 @@ const namesdic = Dict("aeroplane"=>1,"bicycle"=>2,"bird"=>3, "boat"=>4,
 #Yolo V2 pre-trained boxes width and height
 const anchors = [(1.08,1.19),  (3.42,4.41),  (6.63,11.38),  (9.42,5.11),  (16.62,10.52)]
 
-function load()
+function load(;minibatch_size=1)
     return Settings(
         dataset_description = "VOC",
         source = "https://pjreddie.com/media/files/yolov2-tiny-voc.weights",
@@ -22,7 +22,8 @@ function load()
         namesdic = namesdic,
         numsdic = flipdict(namesdic), #Flip the key value pair to help lookup by nums
         anchors = anchors,
-        num_classes = length(namesdic)
+        num_classes = length(namesdic),
+        minibatch_size = minibatch_size
     )
 end
 
