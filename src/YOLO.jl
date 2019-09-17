@@ -42,9 +42,8 @@ end
 Base.@kwdef mutable struct LoadedDataset
     imagestack_matrix::Array{Float32}                       #4D image stack of type Float32 (w,h,colorchannels,numimages)
     paddings::Vector{Array{Int}}
+    labels::Vector{Vector{Label}}
     #label #labels as tupple of arrays. tupples are designed as (ImageWidth, ImageHeight,[x,y,objectWidth,objectHeight],[x,y,objectWidth,objectHeight]..)
-
-    #not finished
 end
 
 include("datasets.jl")
@@ -65,7 +64,7 @@ function load_v2_tiny_voc(;output_dir::String = "YOLO_output")
 
     #Load pre-trained weights into the model
     f = open(weights_file)
-    getweights(model,f)
+    loadweights!(model,f)
     close(f)
 
 

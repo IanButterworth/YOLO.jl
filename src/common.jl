@@ -17,5 +17,9 @@ Create a dict copy of namesdict, for counting the occurances of each named objec
 """
 createcountdict(dict::Dict) = Dict(map(x->(x,0),collect(keys(dict))))
 
-#Define sigmoid function
+"""
+    sigmoid(x)
+
+Standard sigmoid.
+"""
 sigmoid(x) = 1.0 / (1.0 .+ exp(-x))
