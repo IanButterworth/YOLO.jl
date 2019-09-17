@@ -22,8 +22,8 @@ end
     ))
 end
 
-@testset "Loading VOC dataset" begin
-    voc = YOLO.VOC.populate()
+@testset "Populating VOC dataset" begin
+    voc = YOLO.datasets.VOC.populate()
     @test length(voc.image_paths) == 5011
     @test length(voc.label_paths) == 5011
     @test length(voc.objects) == 20
@@ -49,11 +49,36 @@ end
         297,
         324,
     ]
+end
 
-    sets = YOLO.Settings(image_shape = (416, 416), image_channels = 3)
+@testset "Loading pretrained models" begin
+    settings = YOLO.pretrained.v2_tiny_voc.load()
 
-    vocloaded = YOLO.load(voc, sets, indexes = collect(1:10))
+    @test settings.num_classes == 20
+
+    #model = YOLO.v2.load(settings)
+    #loadweights!(model, weightsfile)
+end
+
+@testset "Loading VOC model based on pretrained settings" begin
+    voc = YOLO.datasets.VOC.populate()
+    settings = YOLO.pretrained.v2_tiny_voc.load()
+    vocloaded = YOLO.load(voc, settings, indexes = collect(1:10))
     @test size(vocloaded.imagestack_matrix) == (416, 416, 3, 10)
     @test length(vocloaded.paddings) == 10
     @test length(vocloaded.labels) == 10
+
+    #This test checks that the VOC download hasn't changed
+    @test vec(sum(vocloaded.imagestack_matrix, dims = (1, 2, 3))) ≈ [
+        140752.47,
+        122024.16,
+        126477.125,
+        114651.555,
+        143701.72,
+        196821.47,
+        179382.5,
+        83476.43,
+        132382.72,
+        166430.16,
+    ]
 end

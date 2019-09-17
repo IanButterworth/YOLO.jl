@@ -1,5 +1,7 @@
-
+module datasets
+import ..datasets_dir
 include(joinpath(datasets_dir, "voc", "voc.jl"))
+end #module
 
 """
     download_dataset(;name="all")

@@ -35,8 +35,14 @@ Base.@kwdef mutable struct LabelledImageDataset
 end
 
 Base.@kwdef mutable struct Settings
+    dataset_description::String = ""
+    source::String = ""
     image_shape::Tuple{Int,Int}
     image_channels::Int
+    namesdic::Dict{String,Int64}
+    numsdic::Dict{Int64,String}
+    anchors::Array{Tuple{Float64,Float64}}
+    num_classes::Int
 end
 
 Base.@kwdef mutable struct LoadedDataset
@@ -47,6 +53,7 @@ Base.@kwdef mutable struct LoadedDataset
 end
 
 include("datasets.jl")
+include("pretrained.jl")
 include("models.jl")
 include("preprocess.jl")
 include("postprocess.jl")

@@ -1,6 +1,6 @@
 module VOC
 
-import ..Label, ..LabelledImageDataset
+import ...Label, ...LabelledImageDataset
 
 import LightXML: content,
                  get_elements_by_tagname,
