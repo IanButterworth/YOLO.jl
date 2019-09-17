@@ -1,6 +1,8 @@
 #Author: Yavuz Faruk Bakman
 #Date: 15/08/2019
 
+import ..GPU
+
 #process the input and save into given directory
 saveOut(model,data,conf_thresh,iou_thresh,res,number; record = true, location = "Output") = (saveOut!(model,args,conf_thresh,iou_thresh,res,number; record = record, location = location) for args in data)
 
@@ -151,7 +153,7 @@ function displaytest(file,model; record = false)
     im, padding = loadResizePadImageToFit(file,(416,416))
     im_input = Array{Float32}(undef,416,416,3,1)
     im_input[:,:,:,1] = permutedims(collect(channelview(im)),[2,3,1]);
-    if gpu() >= 0 im_input = KnetArray(im_input) end
+    if GPU >= 0 im_input = KnetArray(im_input) end
     res = model(im_input)
     a = postprocessing(res,0.3,0.3)
     for i in 1:length(a)

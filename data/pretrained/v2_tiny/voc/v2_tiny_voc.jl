@@ -16,6 +16,7 @@ function load()
     return Settings(
         dataset_description = "VOC",
         source = "https://pjreddie.com/media/files/yolov2-tiny-voc.weights",
+        weights_filepath = joinpath(@__DIR__,"v2_tiny_voc.weights"),
         image_shape = (416, 416),
         image_channels = 3,
         namesdic = namesdic,

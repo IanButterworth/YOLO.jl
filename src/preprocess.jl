@@ -104,7 +104,7 @@ Load images from a populated `LabelledImageDataset` into memory.
 function load(
     ds::LabelledImageDataset,
     settings::Settings;
-    indexes::Array{Int} = [],
+    indexes::Union{Array{Int}} = [],
 )
     if length(indexes) == 1
         numimages = 1
@@ -135,8 +135,8 @@ function load(
         paddings = Vector{Vector{Int}}(undef, 0),
         labels = ds.labels[indexes],
     )
-
-    ProgressMeter.@showprogress 0.25 "Loading images..." for i in indexes
+    j = 1
+    ProgressMeter.@showprogress 2 "Loading images..." for i in indexes
         img = FileIO.load(ds.image_paths[i])
         img_size = size(img)
         target_img_size = sizethatfits(img_size, settings.image_shape)
@@ -146,11 +146,12 @@ function load(
             settings,
             kern,
         )
-        lds.imagestack_matrix[:, :, :, i] = collect(permutedims(
+        lds.imagestack_matrix[:, :, :, j] = collect(permutedims(
             channelview(img_resized)[1:settings.image_channels, :, :],
             [2, 3, 1],
         ))
         push!(lds.paddings, padding)
+        j += 1
     end
     return lds
 end

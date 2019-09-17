@@ -1,5 +1,7 @@
 using YOLO, Test
 
+Base.CoreLogging.disable_logging(Base.CoreLogging.Info) #disable printing of @info messages
+
 datadir = joinpath(dirname(dirname(pathof(YOLO))), "data")
 datasetsdir = joinpath(datadir, "datasets")
 pretraineddir = joinpath(datadir, "pretrained")
@@ -57,7 +59,7 @@ end
     @test settings.num_classes == 20
 
     #model = YOLO.v2.load(settings)
-    #loadweights!(model, weightsfile)
+    #loadWeights!(model, weightsfile)
 end
 
 @testset "Loading VOC model based on pretrained settings" begin

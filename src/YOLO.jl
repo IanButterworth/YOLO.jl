@@ -11,7 +11,8 @@ import ProgressMeter
 include("common.jl")
 
 const face = newface(joinpath(@__DIR__,"misc","DroidSansMono.ttf")) #Font type
-const xtype=(Knet.gpu()>=0 ? Knet.KnetArray{Float32} : Array{Float32})#if gpu exists run on gpu
+const GPU = Knet.gpu()
+const xtype=(GPU>=0 ? Knet.KnetArray{Float32} : Array{Float32})#if gpu exists run on gpu
 
 Base.@kwdef mutable struct Label
     x::Float32 #Left hand edge in scaled image width unnits (0-1)
@@ -37,12 +38,14 @@ end
 Base.@kwdef mutable struct Settings
     dataset_description::String = ""
     source::String = ""
+    weights_filepath::String = ""
     image_shape::Tuple{Int,Int}
     image_channels::Int
     namesdic::Dict{String,Int64}
     numsdic::Dict{Int64,String}
     anchors::Array{Tuple{Float64,Float64}}
     num_classes::Int
+    minibatch_size::Int = 1
 end
 
 Base.@kwdef mutable struct LoadedDataset
@@ -71,7 +74,7 @@ function load_v2_tiny_voc(;output_dir::String = "YOLO_output")
 
     #Load pre-trained weights into the model
     f = open(weights_file)
-    loadweights!(model,f)
+    loadWeights!(model,f)
     close(f)
 
 
