@@ -104,6 +104,8 @@ end
     inference_rate = 1 / inference_time
     @test inference_time < 1.0 #seconds
 
+    predictions = YOLO.postprocess(res, settings, conf_thresh = 0.1, iou_thresh = 0.3)
+
     enable_info()
     @info "YOLO_v2_tiny inference time per image: $(round(inference_time, digits=2)) seconds ($(round(inference_rate, digits=2)) fps)"
 end

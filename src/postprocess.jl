@@ -8,7 +8,7 @@ saveOut(model,data,conf_thresh,iou_thresh,res,number; record = true, location = 
 
 function saveOut!(model,args,conf_thresh,iou_thresh,res,number; record = true, location = "Output")
     yolomat = model(args[1])
-    yolomat = postprocessing(yolomat,conf_thresh,iou_thresh)
+    yolomat = postprocess(yolomat,conf_thresh,iou_thresh)
     a = yolomat
     push!(res,a)
     im = args[2][1]
@@ -57,7 +57,7 @@ acc(model,data,conf_thresh,iou_thresh,iou,predictions) =(acc!(model,args,conf_th
 
 function acc!(model,args,conf_thresh,iou_thresh,iou,predictions)
     yolomat = model(args[1])
-    yolomat = postprocessing(yolomat,conf_thresh,iou_thresh)
+    yolomat = postprocess(yolomat,conf_thresh,iou_thresh)
     check = zeros(length(args[2][1])-2)
     sort!(yolomat,by = x-> x[6],rev=true)
     for k in 1:length(yolomat)
@@ -155,7 +155,7 @@ function displaytest(file,model; record = false)
     im_input[:,:,:,1] = permutedims(collect(channelview(im)),[2,3,1]);
     if GPU >= 0 im_input = KnetArray(im_input) end
     res = model(im_input)
-    a = postprocessing(res,0.3,0.3)
+    a = postprocess(res,0.3,0.3)
     for i in 1:length(a)
         drawsquare(im,a[i][1],a[i][2],a[i][3],a[i][4],padding)
         FreeTypeAbstraction.renderstring!(im, string(numsdic[a[i][5]]), face, (14,14)  ,Int32(round(a[i][2]))-padding[2],Int32(round(a[i][1]))-padding[1],halign=:hleft,valign=:vtop,bcolor=eltype(im)(1.0,1.0,1.0),fcolor=eltype(im)(0,0,0)) #use `nothing` to make bcolor transparent
@@ -166,17 +166,20 @@ function displaytest(file,model; record = false)
     if record save("outexample.jpg",im[1:end-p2,1:end-p1]) end
 end
 
-#post processing function.
-#Confidence score threshold to select correct predictions. Recommended : 0.3
-#IoU threshold to remove unnecessary predictions: Recommended:0.3
-function postprocessing(yolomat,conf_thresh,iou_thresh)
-    yolomat = Array{Float32,4}(yolomat)
-    result = []
+"""
+    postprocess(yolomat::Array{Float32}, conf_thresh::Float32, iou_thresh::Float32)
+
+Post processing function.
+Confidence score threshold to select correct predictions. Recommended : 0.3
+IoU threshold to remove unnecessary predictions: Recommended:0.3
+"""
+function postprocess(yolomat::Array{Float32},settings::Settings; conf_thresh::T = 0.3, iou_thresh::T = 0.3) where {T<:AbstractFloat}
+    detections = PredictLabel[]
     RATE = 32
-    for cy in 1:13
+    @views for cy in 1:13
         for cx in 1:13
             for b in 1:5
-                channel = (b-1)*(numClass + 5)
+                channel = (b-1)*(settings.num_classes + 5)
                 tx = yolomat[cy,cx,channel+1,1]
                 ty = yolomat[cy,cx,channel+2,1]
                 tw = yolomat[cy,cx,channel+3,1]
@@ -184,8 +187,9 @@ function postprocessing(yolomat,conf_thresh,iou_thresh)
                 tc = yolomat[cy,cx,channel+5,1]
                 x = (sigmoid(tx) + cx-1) * RATE
                 y = (sigmoid(ty) + cy-1) * RATE
-                w = exp(tw) * anchors[b][1] * RATE
-                h = exp(th) * anchors[b][2] * RATE
+                w = exp(tw) * settings.anchors[b][1] * RATE
+                h = exp(th) * settings.anchors[b][2] * RATE
+
                 conf = sigmoid(tc)
                 classScores = yolomat[cy,cx,channel+6:channel+25,1]
                 classScores = softmax(classScores)
@@ -193,47 +197,55 @@ function postprocessing(yolomat,conf_thresh,iou_thresh)
                 bestScore = classScores[classNo]
                 classConfidenceScore = conf*bestScore
                 if classConfidenceScore > conf_thresh
-                     p = (max(0.0,x-w/2),max(0.0,y-h/2),min(w,416.0),min(h,416.0),classNo,classConfidenceScore)
-                     push!(result,p)
+                    bbox = BBOX(max(0.0,x-w/2),max(0.0,y-h/2),min(w,416.0),min(h,416.0))
+                    p = PredictLabel(bbox = bbox, class = classNo, conf =classConfidenceScore)
+                    push!(detections, p)
                 end
             end
         end
     end
-    result = nonmaxsupression(result,iou_thresh)
-    return result
+    nonMaxSupression!(detections, iou_thresh)
+    return detections
 end
 
-#It removes the predictions overlapping.
-function nonmaxsupression(results,iou_thresh)
-    sort!(results, by = x ->x[6],rev=true)
-    for i in 1:length(results)
-        k = i+1
-        while k <= length(results)
-            if ioumatch(results[i][1],results[i][2],results[i][3],results[i][4],
-                results[k][1],results[k][2],results[k][3],results[k][4]) > iou_thresh && results[i][5] == results[k][5]
-                deleteat!(results,k)
-                k = k - 1
+"""
+    nonMaxSupression!(detections::Vector{PredictLabel}, iou_thresh::Float32)
+
+Removes the predictions overlapping.
+"""
+function nonMaxSupression!(detections::Vector{PredictLabel}, iou_thresh::T) where {T<:AbstractFloat}
+    sort!(detections, by = x -> x.conf, rev = true)
+    for i = 1:length(detections)
+        k = i + 1
+        while k <= length(detections)
+            iou = ioumatch(detections[i].bbox, detections[k].bbox)
+            if iou > iou_thresh && (detections[i].class == detections[k].class)
+                deleteat!(detections, k)
+                k -= 1
             end
-            k = k+1
+            k += 1
         end
     end
- return results
 end
 
-#It calculates IoU score (overlapping rate)
-function ioumatch(x1,y1,w1,h1,x2,y2,w2,h2)
-        r1 = x1 + w1
-        l1 = x1
-        t1 = y1
-        b1 = y1 + h1
-        r2 = x2 + w2
-        l2 = x2
-        t2 = y2
-        b2 = y2 + h2
-        a = min(r1,r2)
-        b = max(t1,t2)
-        c = max(l1,l2)
-        d = min(b1,b2)
-        intersec = (d-b)*(a-c)
-        return intersec/(w1*h1+w2*h2-intersec)
+"""
+    ioumatch(bbox1::BBOX, bbox2::BBOX)
+
+Calculates IoU score (overlapping rate)
+"""
+function ioumatch(bbox1::BBOX, bbox2::BBOX)
+    r1 = bbox1.x + bbox1.w
+    l1 = bbox1.x
+    t1 = bbox1.y
+    b1 = bbox1.y + bbox1.h
+    r2 = bbox2.x + bbox2.w
+    l2 = bbox2.x
+    t2 = bbox2.y
+    b2 = bbox2.y + bbox2.h
+    a = min(r1, r2)
+    b = max(t1, t2)
+    c = max(l1, l2)
+    d = min(b1, b2)
+    intersec = (d - b) * (a - c)
+    return intersec / (bbox1.w * bbox1.h + bbox2.w * bbox2.h - intersec)
 end

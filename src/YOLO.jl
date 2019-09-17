@@ -14,25 +14,35 @@ const face = newface(joinpath(@__DIR__,"misc","DroidSansMono.ttf")) #Font type
 const GPU = Knet.gpu()
 const xtype=(GPU>=0 ? Knet.KnetArray{Float32} : Array{Float32})#if gpu exists run on gpu
 
-Base.@kwdef mutable struct Label
+Base.@kwdef mutable struct BBOX
     x::Float32 #Left hand edge in scaled image width unnits (0-1)
     y::Float32 #Right hand edge in scaled image width unnits (0-1)
     w::Float32 #Width in scaled image width unnits (0-1)
     h::Float32 #Height in scaled image height unnits (0-1)
-    name::String #Description of object
+end
+
+Base.@kwdef mutable struct TruthLabel
+    bbox::BBOX
+    class::Int #Object class
     difficult::Int32 #Difficult flag
+end
+
+Base.@kwdef mutable struct PredictLabel
+    bbox::BBOX
+    class::Int
+    conf::Float32
 end
 
 Base.@kwdef mutable struct LabelledImageDataset
     name::String
-    objects::Vector{String}
+    objects::Dict{Int, String}
     objectcounts::Vector{Int32}
-    image_size_lims::Tuple{Int,Int} = (-1,-1)
+    image_size_lims::Tuple{Int, Int} = (-1,-1)
     images_dir::String
     labels_dir::String
     image_paths::Array{String} = String[]
     label_paths::Array{String} = String[]
-    labels::Vector{Vector{Label}} = Vector{Vector{Label}}(undef,0)
+    labels::Vector{Vector{TruthLabel}} = Vector{Vector{TruthLabel}}(undef,0)
 end
 
 Base.@kwdef mutable struct Settings
@@ -51,7 +61,7 @@ end
 Base.@kwdef mutable struct LoadedDataset
     imagestack_matrix::Array{Float32}                       #4D image stack of type Float32 (w,h,colorchannels,numimages)
     paddings::Vector{Array{Int}}
-    labels::Vector{Vector{Label}}
+    labels::Vector{Vector{TruthLabel}}
     #label #labels as tupple of arrays. tupples are designed as (ImageWidth, ImageHeight,[x,y,objectWidth,objectHeight],[x,y,objectWidth,objectHeight]..)
 end
 
@@ -98,7 +108,7 @@ function batchaccuracy()
     inputdir => takes the directory of input for saving output and returns array of directories of the images
     prepareinput => takes the array of directories of the images and returns 416*416*3*totalImage. =#
     #prepare data for accuracy
-    images,labels = collectLabelImagePairs(dataset_labels_dir,dataset_images_dir)
+    images,labels = collectTruthLabelImagePairs(dataset_labels_dir,dataset_images_dir)
     inp,out,imgs = prepareinputlabels(images,labels)
     print("input for accuracy:  ")
     println(summary(inp))
