@@ -1,4 +1,5 @@
 module datasets
+using BinaryProvider
 import ..datasets_dir
 include(joinpath(datasets_dir, "voc", "voc.jl"))
 end #module
@@ -15,6 +16,7 @@ function download_dataset(name::String = "all")
         voc_root = joinpath(voc_dir, "VOCdevkit")
         isdir(voc_root) && rm(voc_root, force = true, recursive = true)
         tmploc = download("https://pjreddie.com/media/files/VOCtrainval_06-Nov-2007.tar")
-        run(`tar xf $tmploc -C $voc_dir`)
+        BinaryProvider.unpack(tmploc, voc_dir)
+        #run(`tar xf $tmploc -C $voc_dir`)
     end
 end
