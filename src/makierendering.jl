@@ -8,17 +8,17 @@ function renderResult(img::Array{Float32}, predictions::Vector{YOLO.PredictLabel
     img_w = settings.image_shape[1]
     img_h = settings.image_shape[2]
     img_rgb = imgslice_to_rgbimg(img)
-    scene = Scene(resolution = size(img_rgb') .* 2 )
-    image!(scene, img_rgb, scale_plot=false, show_axis = false, limits = FRect(0, 0, img_h, img_w))
-    rotate!(scene, -0.5pi)
+    scene = Makie.Scene(resolution = size(img_rgb') .* 2 )
+    Makie.image!(scene, img_rgb, scale_plot=false, show_axis = false, limits = Makie.FRect(0, 0, img_h, img_w))
+    Makie.rotate!(scene, -0.5pi)
 
     for p in predictions
         col = cols[p.class]
         rect = [p.bbox.y*img_h, p.bbox.x*img_w, p.bbox.h*img_h, p.bbox.w*img_w]
-        poly!(scene, [Rectangle{Float32}(rect...)], color=RGBA(red(col),blue(col),green(col),clamp(p.conf*1.3,0.2,0.6)))
+        Makie.poly!(scene, [Rectangle{Float32}(rect...)], color=RGBA(red(col),blue(col),green(col),clamp(p.conf*1.3,0.2,0.6)))
         name = get(settings.numsdic,p.class,"")
         conf_rounded = round(p.conf, digits=2)
-        text!(scene, "$name\n$(conf_rounded)",
+        Makie.text!(scene, "$name\n$(conf_rounded)",
              position = (rect[1], rect[2]),
              align = (:left,  :top),
              colo = :black,

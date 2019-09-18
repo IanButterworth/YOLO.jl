@@ -14,7 +14,10 @@ function download_dataset(name::String = "all")
         voc_dir = joinpath(datasets_dir, "voc")
         voc_root = joinpath(voc_dir, "VOCdevkit")
         isdir(voc_root) && rm(voc_root, force = true, recursive = true)
+        @info "Downloading dataset..."
         tmploc = download("https://pjreddie.com/media/files/VOCtrainval_06-Nov-2007.tar")
+        @info "Extracting..."
         run(`tar xf $tmploc -C $voc_dir`)
+        @info "Completed"
     end
 end
