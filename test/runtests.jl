@@ -62,11 +62,11 @@ end
     @test settings.num_classes == 20
 
     vocloaded = YOLO.load(voc, settings, indexes = collect(1:num_images))
-    @test size(vocloaded.imagestack_matrix) == (416, 416, 3, num_images)
+    @test size(vocloaded.imstack_mat) == (416, 416, 3, num_images)
     @test length(vocloaded.paddings) == num_images
     @test length(vocloaded.labels) == num_images
     #Checks that the VOC download hasn't changed
-    @test vec(sum(vocloaded.imagestack_matrix, dims = (1, 2, 3))) ≈ [
+    @test vec(sum(vocloaded.imstack_mat, dims = (1, 2, 3))) ≈ [
         140752.47,
         122024.16,
         126477.125,
@@ -82,29 +82,18 @@ end
     model = YOLO.v2_tiny.load(settings)
     YOLO.loadWeights!(model, settings)
 
-    gt = Float32[
-        -0.11728526,
-        -0.1913954,
-        -0.22067541,
-        -0.22349684,
-        0.37789905,
-        -0.09833967,
-        -0.05935463,
-        -0.080488496,
-        0.17405395,
-        -0.11423076,
-    ]
-    res = model(vocloaded.imagestack_matrix) #run once to do compillation overhead
-    t = @elapsed for i = 1:3
-        res = model(vocloaded.imagestack_matrix)
-        @test_skip res[1, 1, 1, 1:10] == gt
-    end
+    res = model(vocloaded.imstack_mat) #run once to deal with compillation overhead
+    t = @elapsed model(vocloaded.imstack_mat)
 
-    inference_time = (t / (num_images * 3))
+    inference_time = t / num_images
     inference_rate = 1 / inference_time
     @test inference_time < 1.0 #seconds
 
     predictions = YOLO.postprocess(res, settings, conf_thresh = 0.1, iou_thresh = 0.3)
+
+    scene = YOLO.renderResult(vocloaded.imstack_mat[:,:,:,1], predictions[1], settings, save_file = "test.png")
+    @test isfile("test.png")
+    rm("test.png", force=true)
 
     enable_info()
     @info "YOLO_v2_tiny inference time per image: $(round(inference_time, digits=2)) seconds ($(round(inference_rate, digits=2)) fps)"

@@ -1,16 +1,14 @@
 module YOLO
 
 using Knet: Knet, progress, progress!, gpu, KnetArray, relu, minibatch, conv4, pool, softmax
-using Random, Glob, FileIO, DelimitedFiles, OffsetArrays
-using Images, ImageDraw, ImageFiltering, ImageTransformations, Colors
-using FreeTypeAbstraction
+using Random, FileIO, DelimitedFiles, OffsetArrays
+using ImageFiltering, ImageTransformations, Colors, ImageCore
 using LightXML
-using ImageMagick
 import ProgressMeter
+using Makie, GeometryTypes
 
 include("common.jl")
 
-const face = newface(joinpath(@__DIR__,"misc","DroidSansMono.ttf")) #Font type
 const GPU = Knet.gpu()
 const xtype=(GPU>=0 ? Knet.KnetArray{Float32} : Array{Float32})#if gpu exists run on gpu
 
@@ -59,7 +57,7 @@ Base.@kwdef mutable struct Settings
 end
 
 Base.@kwdef mutable struct LoadedDataset
-    imagestack_matrix::Array{Float32}                       #4D image stack of type Float32 (w,h,colorchannels,numimages)
+    imstack_mat::Array{Float32}                       #4D image stack of type Float32 (w,h,colorchannels,numimages)
     paddings::Vector{Array{Int}}
     labels::Vector{Vector{TruthLabel}}
     #label #labels as tupple of arrays. tupples are designed as (ImageWidth, ImageHeight,[x,y,objectWidth,objectHeight],[x,y,objectWidth,objectHeight]..)

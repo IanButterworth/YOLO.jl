@@ -125,7 +125,7 @@ function load(
     imgsize = size(firstimg)
 
     lds = LoadedDataset(
-        imagestack_matrix = Array{Float32}(
+        imstack_mat = Array{Float32}(
             undef,
             imgsize[1],
             imgsize[2],
@@ -146,7 +146,7 @@ function load(
             settings,
             kern,
         )
-        lds.imagestack_matrix[:, :, :, j] = collect(permutedims(
+        lds.imstack_mat[:, :, :, j] = collect(permutedims(
             channelview(img_resized)[1:settings.image_channels, :, :],
             [2, 3, 1],
         ))
