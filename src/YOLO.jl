@@ -1,6 +1,16 @@
 module YOLO
-using FileIO, ImageMagick, QuartzImageIO
-using Knet: Knet, progress, progress!, gpu, KnetArray, relu, minibatch, conv4, pool, softmax
+@static Sys.isapple() && using QuartzImageIO
+using FileIO, ImageMagick
+using Knet: Knet,
+            progress,
+            progress!,
+            gpu,
+            KnetArray,
+            relu,
+            minibatch,
+            conv4,
+            pool,
+            softmax
 using Random, DelimitedFiles, OffsetArrays
 using ImageFiltering, ImageTransformations, Colors, ImageCore
 using LightXML
@@ -11,7 +21,7 @@ using Requires
 include("common.jl")
 
 const GPU = Knet.gpu()
-const xtype=(GPU>=0 ? Knet.KnetArray{Float32} : Array{Float32})#if gpu exists run on gpu
+const xtype = (GPU >= 0 ? Knet.KnetArray{Float32} : Array{Float32})#if gpu exists run on gpu
 
 Base.@kwdef mutable struct BBOX
     x::Float32 #Left hand edge in scaled image width unnits (0-1)
@@ -34,14 +44,14 @@ end
 
 Base.@kwdef mutable struct LabelledImageDataset
     name::String
-    objects::Dict{Int, String}
+    objects::Dict{Int,String}
     objectcounts::Vector{Int32}
-    image_size_lims::Tuple{Int, Int} = (-1,-1)
+    image_size_lims::Tuple{Int,Int} = (-1, -1)
     images_dir::String
     labels_dir::String
     image_paths::Array{String} = String[]
     label_paths::Array{String} = String[]
-    labels::Vector{Vector{TruthLabel}} = Vector{Vector{TruthLabel}}(undef,0)
+    labels::Vector{Vector{TruthLabel}} = Vector{Vector{TruthLabel}}(undef, 0)
 end
 
 Base.@kwdef mutable struct Settings
@@ -71,7 +81,7 @@ include("preprocess.jl")
 include("postprocess.jl")
 
 function __init__()
-    @require Makie="ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a" include("makierendering.jl")
+    @require Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a" include("makierendering.jl")
 end
 
 
