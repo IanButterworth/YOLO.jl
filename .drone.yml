@@ -7,8 +7,8 @@ platform:
 
 steps:
 - name: build
- image: julia:1.2
- commands:
+  image: julia:1.2
+  commands:
      - uname -a
      - julia --project=. -e 'using Pkg; Pkg.build(); Pkg.test(coverage=true)'
 
