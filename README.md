@@ -23,7 +23,7 @@ vocloaded = YOLO.load(voc, settings, indexes = [100])
 res = model(vocloaded.imstack_mat);
 
 #Convert the output into readable predictions
-predictions = YOLO.postprocess(res, settings, conf_thresh = 0.3, iou_thresh = 0.3
+predictions = YOLO.postprocess(res, settings, conf_thresh = 0.3, iou_thresh = 0.3)
 ```
 
 ### Rendering results
