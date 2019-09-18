@@ -3,9 +3,9 @@
 *.jl.cov
 *.jl.mem
 .DS_Store
-/Manifest.toml
+Manifest.toml
 /dev/
 /deps/*
 !/deps/build.jl
 *.weights
-/data/datasets/*
+/data/datasets/voc/VOCdevkit

@@ -1,171 +1,157 @@
-#Author: Yavuz Faruk Bakman
-#Date: 15/08/2019
+"""
+    resizekern(source_size::Tuple{Int,Int}, dest_size::Tuple{Int,Int})
 
-#collects all labels and images' directories
-function inputandlabelsdir(dirlab,dirinput)
-    println("Collecting input and labels' directories")
-    labels = []
-    images = []
-    for (root, dirs, files) in walkdir(mkpath(dirlab);)
-        for file in files
-            if occursin(".xml",file)
-                tolabel = joinpath(root,file)
-                jpgFile = string(file[1:length(file)-3], "jpg")
-                toimage = joinpath(dirinput,jpgFile)
-                push!(labels,tolabel)
-                push!(images,toimage)
-            end
-        end
-    end
-    println("Collecting done")
-    return images,labels
-end
-
-#collects input directories
-function inputdir(inputdir)
-    images  = []
-    println("Collecting input directories")
-    for (root, dirs, files) in walkdir(mkpath(inputdir);)
-        for file in files
-            toimage = joinpath(root,file)
-            push!(images,toimage)
-        end
-    end
-    return images
-    println("Collecting done")
-end
-
-#prepares input and its' labels
-function prepareinputlabels(inArr,labArr)
-    in,imgs = prepareinput(inArr)
-    lab = preparelabels(labArr)
-    lab = arrangelabels(lab,416)
-    return in,lab,imgs
-end
-
-prepInput(inRes,imgs,data) =(prepInput!(inRes,imgs,args) for args in data)
-
-function prepInput!(inRes,imgs,args)
-    im, img_size, img_originalsize, padding = loadprepareimage(args,(416,416))
-    im_input = Array{Float32}(undef,416,416,3,1)
-    im_input[:,:,:,1] = permutedims(collect(channelview(im)),[2,3,1])
-    push!(inRes,im_input)
-    push!(imgs,im)
-end
-
-function prepareinput(inArr)
-    inRes = Array{Array{Float32,4},1}()
-    imgs= []
-    println("Pre-processing images")
-    progress!(prepInput(inRes,imgs,inArr))
-    println("Pre-processing done")
-    return cat(inRes...,dims=4),imgs
-end
-
-preplabels(labArr,labRes) =(preplabels!(args,labRes) for args in labArr)
-
-#prepares labels
-function preplabels!(args,labRes)
-    toPush = []
-    xdoc = parse_file(args)
-    xroot = root(xdoc)
-    ces = get_elements_by_tagname(xroot, "size")
-    width = parse(Int32,content(find_element(ces[1], "width")))
-    height = parse(Int32,content(find_element(ces[1], "height")))
-    push!(toPush,width)
-    push!(toPush,height)
-    ces = get_elements_by_tagname(xroot, "object")
-    for i in 1:length(ces)
-        obj = []
-        name= content(find_element(ces[i], "name"))
-        difficult = content(find_element(ces[i], "difficult"))
-        if difficult == "0"
-            totaldic[name] = totaldic[name] + 1
-            #get xmin xmax ymin ymax
-            xmin = parse(Int32,content(find_element(find_element(ces[i], "bndbox"),"xmin")))
-            xmax = parse(Int32,content(find_element(find_element(ces[i], "bndbox"),"xmax")))
-            ymin = parse(Int32,content(find_element(find_element(ces[i], "bndbox"),"ymin")))
-            ymax = parse(Int32,content(find_element(find_element(ces[i], "bndbox"),"ymax")))
-            push!(obj,xmin)
-            push!(obj,ymin)
-            push!(obj,xmax-xmin)
-            push!(obj,ymax-ymin)
-            push!(obj,name)
-            push!(toPush,obj)
-        end
-
-    end
-    push!(labRes,toPush)
-end
-
-function preparelabels(labArr)
-    labRes = []
-    println("Preparing labels...")
-    progress!(preplabels(labArr,labRes))
-    println("Labels are done")
-    return labRes
-end
-
-arrlabels(lab,size) =(arrlabels!(args,size) for args in lab)
-
-function arrlabels!(args,size)
-    w = args[1]
-    h = args[2]
-    for k in 3:length(args)
-        m = max(w,h)
-        rate = size/m
-        if w >= h
-            pad = floor((size - h*rate)/2)
-            args[k][1] = floor(args[k][1]*rate)
-            args[k][2] = floor(args[k][2]*rate) + pad
-            args[k][3] = floor(args[k][3]*rate)
-            args[k][4] = floor(args[k][4]*rate)
-        else
-            pad = floor((size - w*rate)/2)
-            args[k][1] = floor(args[k][1]*rate) + pad
-            args[k][2] = floor(args[k][2]*rate)
-            args[k][3] = floor(args[k][3]*rate)
-            args[k][4] = floor(args[k][4]*rate)
-        end
-    end
-end
-# return all tupples as(ImageWidth, ImageHeight,[x,y,objectWidth,objectHeight],ImageHeight,[x,y,objectWidth,objectHeight]..)
-function arrangelabels(lab,size)
-    println("Arranging labels...")
-    progress!(arrlabels(lab,size))
-    println("Labels are arranged")
-    return lab
-end
-
-
-#prepares an image as given shapes
-function loadprepareimage(img_path::String,img_shape::Tuple{Int,Int})
-    #Extract image
-    img = load(img_path)
-    img_originalsize = size(img)
-
-    if img_originalsize[1] > img_originalsize[2]
-        img_size = (img_shape[1],floor(Int,img_shape[2]*(img_originalsize[2]/img_originalsize[1])))
+Create an image resize blur kernel, for use before reducing image size to avoid aliasing.
+"""
+function resizekern(source_size::Tuple{Int,Int}, dest_size::Tuple{Int,Int})
+    # Blur before resizing to prevent aliasing (kernel size dependent on both source and target image size)
+    σ = map((o, n) -> 0.75 * o / n, source_size, dest_size)
+    if first(σ) < 1
+        return ImageFiltering.KernelFactors.gaussian(σ)
     else
-        img_size = (floor(Int,img_shape[1]*(img_originalsize[1]/img_originalsize[2])),img_shape[2])
+        return ImageFiltering.KernelFactors.IIRGaussian(σ)
     end
+end
 
-    # Resize after blurring to prevent aliasing
-    σ = map((o,n)->0.75*o/n, size(img), img_size)
-    kern = KernelFactors.gaussian(σ)   # from ImageFiltering
-    imgr = imresize(imfilter(img, kern, NA()), img_size)
+"""
+    sizethatfits(original_size::Tuple{Int,Int},target_shape::Tuple{Int,Int})
+
+Takes an original image size, and fits it to a target shape for image resizing. Maintains aspect ratio.
+"""
+function sizethatfits(
+    original_size::Tuple{Int,Int},
+    target_shape::Tuple{Int,Int},
+)
+    if original_size[1] > original_size[2]
+        target_img_size = (
+            target_shape[1],
+            floor(Int, target_shape[2] * (original_size[2] / original_size[1])),
+        )
+    else
+        target_img_size = (
+            floor(Int, target_shape[1] * (original_size[1] / original_size[2])),
+            target_shape[2],
+        )
+    end
+    return target_img_size
+end
+
+"""
+    loadResizePadImageToFit(img_path::String, sets::Settings)
+
+Load image and reesize it to fit inside the target image shap, while maintaining
+aspect ratio and preventing aliasing.
+"""
+function loadResizePadImageToFit(
+    img_path::String,
+    sets::Settings
+)
+    img = FileIO.load(img_path)
+    img_size = size(img)
+    target_img_size = sizethatfits(img_size, sets.image_shape)
+    kern = resizekern(img_size, target_img_size)
+    return resizePadImageToFit(img, target_img_size, sets, kern)
+end
+
+"""
+    resizePadImageToFit(img_path::String, sets::Settings, kern::Tuple{ImageFiltering.KernelFactors.ReshapedOneD,ImageFiltering.KernelFactors.ReshapedOneD})
+
+Loads and prepares (resizes + pads) an image to fit within a given shape.
+Returns the image and the padding.
+"""
+function resizePadImageToFit(
+    img::Array{T},
+    target_img_size::Tuple{Int,Int},
+    settings::Settings,
+    kern::Tuple{
+        ImageFiltering.KernelFactors.ReshapedOneD,
+        ImageFiltering.KernelFactors.ReshapedOneD,
+    },
+) where {T<:ColorTypes.Color}
+
+    imgr = ImageTransformations.imresize(
+        ImageFiltering.imfilter(img, kern, NA()),
+        target_img_size,
+    )
 
     # Determine top and left padding
-    vpad_top = floor(Int,(img_shape[1]-img_size[1])/2)
-    hpad_left = floor(Int,(img_shape[2]-img_size[2])/2)
+    vpad_top = floor(Int, (settings.image_shape[1] - target_img_size[1]) / 2)
+    hpad_left = floor(Int, (settings.image_shape[2] - target_img_size[2]) / 2)
 
     # Determine bottom and right padding accounting for rounding of top and left (to ensure accuate result image size if source has odd dimensions)
-    vpad_bottom = img_shape[1] - (vpad_top + img_size[1])
-    hpad_right = img_shape[2] - (hpad_left + img_size[2])
+    vpad_bottom = settings.image_shape[1] - (vpad_top + target_img_size[1])
+    hpad_right = settings.image_shape[2] - (hpad_left + target_img_size[2])
 
-    padding = [hpad_left,vpad_top,hpad_right,vpad_bottom]
+    padding = [hpad_left, vpad_top, hpad_right, vpad_bottom]
 
     # Pad image
-    imgrp = padarray(imgr, Fill(ColorTypes.RGB(0.0,0.0,0.0),(vpad_top,hpad_left),(vpad_bottom,hpad_right)))
-    return imgrp, img_size, img_originalsize, padding
+    return padarray(
+            imgr,
+            Fill(
+                zero(eltype(img)),
+                (vpad_top, hpad_left),
+                (vpad_bottom, hpad_right),
+            ),
+        ),
+        padding
+end
+
+"""
+    load(ds::LabelledImageDataset, settings::Settings; limitfirst::Int = -1)
+
+Load images from a populated `LabelledImageDataset` into memory.
+"""
+function load(
+    ds::LabelledImageDataset,
+    settings::Settings;
+    indexes::Union{Array{Int}} = [],
+)
+    if length(indexes) == 1
+        numimages = 1
+    elseif length(indexes) > 0 && length(indexes) < length(ds.image_paths)
+        numimages = length(indexes)
+        @info "Loading $(numimages) images from $(ds.name) dataset into memory"
+    else
+        numimages = length(ds.image_paths)
+        indexes = 1:numimages
+        @info "Loading all ($(numimages)) images from $(ds.name) dataset into memory"
+    end
+    kern = resizekern(ds.image_size_lims, settings.image_shape)
+
+    firstimg, padding = loadResizePadImageToFit(
+        ds.image_paths[1],
+        settings,
+    )
+    imgsize = size(firstimg)
+
+    lds = LoadedDataset(
+        imstack_mat = Array{Float32}(
+            undef,
+            imgsize[1],
+            imgsize[2],
+            settings.image_channels,
+            numimages,
+        ),
+        paddings = Vector{Vector{Int}}(undef, 0),
+        labels = ds.labels[indexes],
+    )
+    j = 1
+    ProgressMeter.@showprogress 2 "Loading images..." for i in indexes
+        img = FileIO.load(ds.image_paths[i])
+        img_size = size(img)
+        target_img_size = sizethatfits(img_size, settings.image_shape)
+        img_resized, padding = resizePadImageToFit(
+            img,
+            target_img_size,
+            settings,
+            kern,
+        )
+        lds.imstack_mat[:, :, :, j] = collect(permutedims(
+            channelview(img_resized)[1:settings.image_channels, :, :],
+            [2, 3, 1],
+        ))
+        push!(lds.paddings, padding)
+        j += 1
+    end
+    return lds
 end
