@@ -1,11 +1,11 @@
-# YOLO.jl - Work in progress!
+# YOLO.jl
 
-Currently only supports loading YOLOv2-tiny and the VOC pretrained (by Darknet) model.
+Currently only supports loading YOLOv2-tiny and the VOC pretrained model (pretrained by Darknet).
 
-Loading of pretrainedMade possible by Yavuz Bakman's work in https://github.com/Ybakman/YoloV2
+The majority of this is made possible by Yavuz Bakman's great work in https://github.com/Ybakman/YoloV2
 
 
-### Example (WIP)
+## Example Usage (WIP)
 ```julia
 using YOLO
 
@@ -18,15 +18,25 @@ YOLO.loadWeights!(model, settings)
 
 voc = YOLO.datasets.VOC.populate()
 vocloaded = YOLO.load(voc, settings, indexes = [100])
+
+#Run the model
 res = model(vocloaded.imstack_mat);
 
-predictions = YOLO.postprocess(res, settings, conf_thresh = 0.3, iou_thresh = 0.3)
+#Convert the output into readable predictions
+predictions = YOLO.postprocess(res, settings, conf_thresh = 0.3, iou_thresh = 0.3
+```
+
+### Rendering results
+To render results, first load `Makie` before `YOLO` (in a fresh julia instance):
+```julia
+using Makie, YOLO
+## Repeat above steps
 scene = YOLO.renderResult(vocloaded.imstack_mat[:,:,:,1], predictions, settings, save_file = "test.png")
 display(scene)
 ```
 
 
-## Inference speed (on a modern macbook CPU)
+### Testing inference speed
 ```julia
 using BenchmarkTools
 @btime begin
@@ -34,7 +44,7 @@ using BenchmarkTools
   predictions = YOLO.postprocess(res, settings, conf_thresh = 0.3, iou_thresh = 0.3)
 end
 ```
-
+Results on a modern macbook. CPU-only:
 ```
 BenchmarkTools.Trial:
   memory estimate:  124.39 MiB
@@ -48,3 +58,4 @@ BenchmarkTools.Trial:
   samples:          44
   evals/sample:     1
 ```
+i.e. ~10 FPS
