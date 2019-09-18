@@ -1,7 +1,7 @@
 module YOLO
-
+using FileIO, ImageMagick, QuartzImageIO
 using Knet: Knet, progress, progress!, gpu, KnetArray, relu, minibatch, conv4, pool, softmax
-using Random, FileIO, DelimitedFiles, OffsetArrays
+using Random, DelimitedFiles, OffsetArrays
 using ImageFiltering, ImageTransformations, Colors, ImageCore
 using LightXML
 import ProgressMeter
