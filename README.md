@@ -4,6 +4,32 @@ Currently only supports loading YOLOv2-tiny and the VOC pretrained model (pretra
 
 The majority of this is made possible by Yavuz Bakman's great work in https://github.com/Ybakman/YoloV2
 
+**Docs**
+[![Join the julia slack](https://img.shields.io/badge/chat-slack%23machine%46learning-yellow.svg)](https://slackinvite.julialang.org)
+
+| **Platform**                                                               | **Build Status**                                                                                |
+|:-------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------:|
+| Linux & MacOS x86 | [![][travis-img]][travis-url] |
+| Windows 32/64-bit | [![][appveyor-img]][appveyor-url] |
+| Linux ARM 32/64-bit | [![][drone-img]][drone-url] |
+| FreeBSD x86 | [![][cirrus-img]][cirrus-url] |
+|  | [![Codecoverage Status][codecov-img]][codecov-url]<br>[![Coveralls Status](coveralls-badge)](coveralls-url) * |
+
+
+## Installation
+
+The package can be installed with the Julia package manager.
+From the Julia REPL, type `]` to enter the Pkg REPL mode and run:
+
+```
+pkg> add VideoIO
+```
+
+Or, equivalently, via the `Pkg` API:
+
+```julia
+julia> import Pkg; Pkg.add("VideoIO")
+```
 
 ## Example Usage (WIP)
 ```julia
@@ -59,3 +85,29 @@ BenchmarkTools.Trial:
   evals/sample:     1
 ```
 i.e. ~10 FPS
+
+
+
+
+
+[discourse-tag-url]: https://discourse.julialang.org/tags/yolo
+
+[travis-img]: https://travis-ci.org/ianshmean/YOLO.jl.svg?branch=master
+[travis-url]: https://travis-ci.org/ianshmean/YOLO.jl
+
+[appveyor-img]: https://ci.appveyor.com/api/projects/status/c1nc5aavymq76xun?svg=true
+[appveyor-url]: https://ci.appveyor.com/project/ianshmean/YOLO-jl
+
+[drone-img]: https://cloud.drone.io/api/badges/ianshmean/YOLO.jl/status.svg
+[drone-url]: https://cloud.drone.io/ianshmean/YOLO.jl
+
+[cirrus-img]: https://api.cirrus-ci.com/github/ianshmean/YOLO.jl.svg
+[cirrus-url]: https://cirrus-ci.com/github/ianshmean/YOLO.jl
+
+[codecov-img]: https://codecov.io/gh/ianshmean/YOLO.jl/branch/master/graph/badge.svg
+[codecov-url]: https://codecov.io/gh/ianshmean/YOLO.jl
+
+[coveralls-img]: "https://coveralls.io/repos/github/ianshmean/YOLO.jl/badge.svg?branch=master"
+[coveralls-url]: "https://coveralls.io/github/ianshmean/YOLO.jl?branch=master"
+
+[issues-url]: https://github.com/ianshmean/YOLO.jl/issues
