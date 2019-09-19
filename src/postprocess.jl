@@ -7,7 +7,7 @@ Post processing function.
 Confidence score threshold to select correct predictions. Recommended : 0.3
 IoU threshold to remove unnecessary predictions: Recommended:0.3
 """
-function postprocess(yolomat::Array{Float32},settings::Settings; conf_thresh::T = 0.3, iou_thresh::T = 0.3) where {T<:AbstractFloat}
+function postprocess(yolomat::xtype,settings::Settings; conf_thresh::T = 0.3, iou_thresh::T = 0.3) where {T<:AbstractFloat}
     im_w = settings.image_shape[1]
     im_h = settings.image_shape[2]
     num_images = size(yolomat,4)
