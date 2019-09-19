@@ -123,18 +123,12 @@ function load(
         settings,
     )
     imgsize = size(firstimg)
-
     lds = LoadedDataset(
-        imstack_mat = Array{Float32}(
-            undef,
-            imgsize[1],
-            imgsize[2],
-            settings.image_channels,
-            numimages,
-        ),
-        paddings = Vector{Vector{Int}}(undef, 0),
-        labels = ds.labels[indexes],
-    )
+            imstack_mat = xtype(undef,imgsize[1],imgsize[2],settings.image_channels,numimages),
+            paddings = Vector{Vector{Int}}(undef, 0),
+            labels = ds.labels[indexes],
+        )
+
     j = 1
     ProgressMeter.@showprogress 2 "Loading images..." for i in indexes
         img = FileIO.load(ds.image_paths[i])
