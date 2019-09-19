@@ -5,7 +5,7 @@ Currently only supports loading YOLOv2-tiny and the VOC pretrained model (pretra
 The majority of this is made possible by Yavuz Bakman's great work in https://github.com/Ybakman/YoloV2
 
 **Docs**
-[![Join the julia slack](https://img.shields.io/badge/chat-slack%23machine%46learning-yellow.svg)](https://slackinvite.julialang.org)
+[![Join the julia slack](https://img.shields.io/badge/chat-slack%23machine%2Dlearning-yellow.svg)](https://slackinvite.julialang.org)
 
 | **Platform**                                                               | **Build Status**                                                                                |
 |:-------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------:|
@@ -92,8 +92,8 @@ i.e. ~10 FPS
 
 [discourse-tag-url]: https://discourse.julialang.org/tags/yolo
 
-[travis-img]: https://travis-ci.org/ianshmean/YOLO.jl.svg?branch=master
-[travis-url]: https://travis-ci.org/ianshmean/YOLO.jl
+[travis-img]: https://travis-ci.com/ianshmean/YOLO.jl.svg?branch=master
+[travis-url]: https://travis-ci.com/ianshmean/YOLO.jl
 
 [appveyor-img]: https://ci.appveyor.com/api/projects/status/c1nc5aavymq76xun?svg=true
 [appveyor-url]: https://ci.appveyor.com/project/ianshmean/YOLO-jl
@@ -107,7 +107,7 @@ i.e. ~10 FPS
 [codecov-img]: https://codecov.io/gh/ianshmean/YOLO.jl/branch/master/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/ianshmean/YOLO.jl
 
-[coveralls-img]: "https://coveralls.io/repos/github/ianshmean/YOLO.jl/badge.svg?branch=master"
-[coveralls-url]: "https://coveralls.io/github/ianshmean/YOLO.jl?branch=master"
+[coveralls-img]: https://coveralls.io/repos/github/ianshmean/YOLO.jl/badge.svg?branch=master
+[coveralls-url]: https://coveralls.io/github/ianshmean/YOLO.jl?branch=master
 
 [issues-url]: https://github.com/ianshmean/YOLO.jl/issues
