@@ -1,16 +1,10 @@
 module YOLO
+include("common.jl")
+!isfile(joinpath(pretrained_dir,"v2_tiny","voc2007","v2_tiny_voc.weights")) && @error "YOLO has build errors. Re-run `]build YOLO`"
+
 @static Sys.isapple() && using QuartzImageIO
 using FileIO, ImageMagick
-using Knet: Knet,
-            progress,
-            progress!,
-            gpu,
-            KnetArray,
-            relu,
-            minibatch,
-            conv4,
-            pool,
-            softmax
+using Knet: Knet, progress, progress!, gpu, KnetArray, relu, minibatch, conv4, pool, softmax
 using Random, DelimitedFiles, OffsetArrays
 using ImageFiltering, ImageTransformations, Colors, ImageCore
 using LightXML
@@ -18,7 +12,7 @@ import ProgressMeter
 using GeometryTypes
 using Requires
 
-include("common.jl")
+
 
 const GPU = Knet.gpu()
 const xtype = (GPU >= 0 ? Knet.KnetArray{Float32} : Array{Float32})#if gpu exists run on gpu
