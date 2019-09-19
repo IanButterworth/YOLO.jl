@@ -9,3 +9,4 @@ Manifest.toml
 !/deps/build.jl
 *.weights
 /data/datasets/voc2007/VOCdevkit
+/data/datasets/voc2007/._VOCdevkit
