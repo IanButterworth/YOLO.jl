@@ -36,7 +36,7 @@ julia> import Pkg; Pkg.add("VideoIO")
 using YOLO
 
 #First time only (downloads 5011 images & labels!)
-YOLO.download_dataset("voc")
+YOLO.download_dataset("voc2007")
 
 settings = YOLO.pretrained.v2_tiny_voc.load(minibatch_size=1)
 model = YOLO.v2_tiny.load(settings)
@@ -56,7 +56,7 @@ predictions = YOLO.postprocess(res, settings, conf_thresh = 0.3, iou_thresh = 0.
 To render results, first load `Makie` before `YOLO` (in a fresh julia instance):
 ```julia
 using Makie, YOLO
-## Repeat above steps
+## Repeat all above steps to load & run the model
 scene = YOLO.renderResult(vocloaded.imstack_mat[:,:,:,1], predictions, settings, save_file = "test.png")
 display(scene)
 ```

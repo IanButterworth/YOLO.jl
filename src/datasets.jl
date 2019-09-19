@@ -1,6 +1,6 @@
 module datasets
 import ..datasets_dir
-include(joinpath(datasets_dir, "voc", "voc.jl"))
+include(joinpath(datasets_dir, "voc2007", "voc.jl"))
 end #module
 
 using BinaryProvider
@@ -12,7 +12,7 @@ Download supported datasets. If folder exists, deletes first.
 function download_dataset(name::String = "all")
     !isdir(datasets_dir) && mkdir(datasets_dir)
     if any(name .== ["voc2007","VOC2007","voc", "VOC", "all"])
-        voc_dir = joinpath(datasets_dir, "voc")
+        voc_dir = joinpath(datasets_dir, "voc2007")
         voc_root = joinpath(voc_dir, "VOCdevkit")
         isdir(voc_root) && rm(voc_root, force = true, recursive = true)
         @info "Downloading dataset..."

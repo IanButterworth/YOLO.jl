@@ -8,20 +8,20 @@ datadir = joinpath(dirname(dirname(pathof(YOLO))), "data")
 datasetsdir = joinpath(datadir, "datasets")
 pretraineddir = joinpath(datadir, "pretrained")
 
-if !isdir(joinpath(datasetsdir, "voc", "VOCdevkit", "VOC2007"))
+if !isdir(joinpath(datasetsdir, "voc2007", "VOCdevkit", "VOC2007"))
     @info "Downloading VOC dataset for testing..."
-    YOLO.download_dataset("voc")
+    YOLO.download_dataset("voc2007")
 end
 
 @testset "Example datasets have been downloaded" begin
-    @test isdir(joinpath(datasetsdir, "voc", "VOCdevkit", "VOC2007"))
+    @test isdir(joinpath(datasetsdir, "voc2007", "VOCdevkit", "VOC2007"))
 end
 
 @testset "Example pretrained weights files have been downloaded" begin
     @test isfile(joinpath(
         pretraineddir,
         "v2_tiny",
-        "voc",
+        "voc2007",
         "v2_tiny_voc.weights",
     ))
 end
