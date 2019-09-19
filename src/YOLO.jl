@@ -1,5 +1,5 @@
 module YOLO
-@static (Sys.isapple() || Sys.isfreebsd()) && using QuartzImageIO
+@static Sys.isapple() && using QuartzImageIO
 using FileIO, ImageMagick
 using Knet: Knet,
             progress,
