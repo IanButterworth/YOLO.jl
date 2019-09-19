@@ -31,4 +31,4 @@ function renderResult(img::Array{Float32}, predictions::Vector{YOLO.PredictLabel
 end
 
 renderResult(img::KnetArray{Float32}, predictions::Vector{YOLO.PredictLabel}, settings::YOLO.Settings; save_file::String = "") =
-renderResult(Array{Float32}(img), predictions = predictions, settings = settings, save_file = save_file)
+renderResult(Array{Float32}(img), predictions, settings, save_file = save_file)
