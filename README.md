@@ -14,7 +14,7 @@ See below for examples or ask questions on [![Join the julia slack](https://img.
 | Windows 32/64-bit | [![][appveyor-img]][appveyor-url] |
 | Linux ARM 32/64-bit | [![][drone-img]][drone-url] |
 | FreeBSD x86 | [![][cirrus-img]][cirrus-url] |
-|  | [![Codecoverage Status][codecov-img]][codecov-url]<br>[![Coveralls Status][coveralls-img]][coveralls-url] * |
+|  | [![Codecoverage Status][codecov-img]][codecov-url]<br>[![Coveralls Status][coveralls-img]][coveralls-url] |
 
 
 ## Installation
