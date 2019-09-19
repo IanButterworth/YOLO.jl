@@ -23,13 +23,7 @@ The package can be installed with the Julia package manager.
 From the Julia REPL, type `]` to enter the Pkg REPL mode and run:
 
 ```
-pkg> add VideoIO
-```
-
-Or, equivalently, via the `Pkg` API:
-
-```julia
-julia> import Pkg; Pkg.add("VideoIO")
+pkg> add https://github.com/ianshmean/YOLO.jl
 ```
 
 ## Example Usage (WIP)
