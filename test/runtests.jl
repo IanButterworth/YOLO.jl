@@ -83,9 +83,11 @@ end
     YOLO.loadWeights!(model, settings)
 
     res = model(vocloaded.imstack_mat) #run once to deal with compillation overhead
-    t = @elapsed model(vocloaded.imstack_mat)
+    t = @elapsed for i in 1:10
+        model(vocloaded.imstack_mat)
+    end
 
-    inference_time = t / num_images
+    inference_time = (t / 10) / num_images
     inference_rate = 1 / inference_time
     @test inference_time < 1.0 #seconds
 
