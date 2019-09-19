@@ -5,7 +5,8 @@ Currently only supports loading YOLOv2-tiny and the VOC pretrained model (pretra
 The majority of this is made possible by Yavuz Bakman's great work in https://github.com/Ybakman/YoloV2
 
 **Docs**
-[![Join the julia slack](https://img.shields.io/badge/chat-slack%23machine%2Dlearning-yellow.svg)](https://slackinvite.julialang.org)
+
+See below for examples or ask questions on [![Join the julia slack](https://img.shields.io/badge/slack-%23machine--learning-yellow)](https://slackinvite.julialang.org)
 
 | **Platform**                                                               | **Build Status**                                                                                |
 |:-------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------:|
