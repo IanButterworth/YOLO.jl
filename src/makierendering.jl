@@ -29,3 +29,6 @@ function renderResult(img::Array{Float32}, predictions::Vector{YOLO.PredictLabel
     save_file != "" && Makie.save(save_file, scene)
     return scene
 end
+
+renderResult(img::KnetArray{Float32}, predictions::Vector{YOLO.PredictLabel}, settings::YOLO.Settings; save_file::String = "") =
+renderResult(Array{Float32}(img), predictions = predictions, settings = settings, save_file = save_file)
