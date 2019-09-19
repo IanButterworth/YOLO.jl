@@ -68,11 +68,12 @@ Base.@kwdef mutable struct Settings
 end
 
 Base.@kwdef mutable struct LoadedDataset
-    imstack_mat::Array{Float32}                       #4D image stack of type Float32 (w,h,colorchannels,numimages)
+    imstack_mat::xtype                       #4D image stack of type Float32 (w,h,colorchannels,numimages)
     paddings::Vector{Array{Int}}
     labels::Vector{Vector{TruthLabel}}
     #label #labels as tupple of arrays. tupples are designed as (ImageWidth, ImageHeight,[x,y,objectWidth,objectHeight],[x,y,objectWidth,objectHeight]..)
 end
+
 
 include("datasets.jl")
 include("pretrained.jl")
