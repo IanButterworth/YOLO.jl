@@ -13,7 +13,7 @@ The majority of this is made possible by Yavuz Bakman's great work in https://gi
 | Windows 32/64-bit | [![][appveyor-img]][appveyor-url] |
 | Linux ARM 32/64-bit | [![][drone-img]][drone-url] |
 | FreeBSD x86 | [![][cirrus-img]][cirrus-url] |
-|  | [![Codecoverage Status][codecov-img]][codecov-url]<br>[![Coveralls Status](coveralls-badge)](coveralls-url) * |
+|  | [![Codecoverage Status][codecov-img]][codecov-url]<br>[![Coveralls Status][coveralls-img]][coveralls-url] * |
 
 
 ## Installation
