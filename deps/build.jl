@@ -3,9 +3,9 @@ weightsdir = joinpath(@__DIR__, "..", "data", "pretrained")
 
 @info "Downloading weights files"
 
-v2_tiny_dir = joinpath(weightsdir, "v2_tiny", "voc")
+v2_tiny_dir = joinpath(weightsdir, "v2_tiny", "voc2007")
 download(
-    "https://pjreddie.com/media/files/yolov2-tiny-voc.weights",
+    "https://github.com/ianshmean/YOLO.jl/releases/download/v2-tiny-VOC/v2_tiny_voc.weights",
     joinpath(v2_tiny_dir, "v2_tiny_voc.weights"),
 )
 

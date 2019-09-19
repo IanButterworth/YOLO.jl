@@ -19,12 +19,12 @@ const namesdic = Dict("aeroplane"=>1,"bicycle"=>2,"bird"=>3, "boat"=>4,
 
 labels_dir = joinpath(
     datasets_dir,
-    "voc",
+    "voc2007",
     "VOCdevkit",
     "VOC2007",
     "Annotations",
 )
-images_dir = joinpath(datasets_dir, "voc", "VOCdevkit", "VOC2007", "JPEGImages")
+images_dir = joinpath(datasets_dir, "voc2007", "VOCdevkit", "VOC2007", "JPEGImages")
 
 """
     populate()
@@ -33,7 +33,7 @@ Populate VOC dataset as a `LabelledImageDataset`.
 """
 function populate()
     if !isdir(joinpath(@__DIR__, "VOCdevkit", "VOC2007"))
-        @error """VOC dataset is not downloaded. Download with `YOLO.download_dataset("voc")` and try again."""
+        @error """VOC dataset is not downloaded. Download with `YOLO.download_dataset("voc2007")` and try again."""
         return nothing
     end
     @info "Populating VOC dataset"
@@ -78,10 +78,8 @@ function collectTruthLabelImagePairs(labels_dir::String, images_dir::String)
     labels, images = String[], String[]
     excluded = 0
     for (root, dirs, files) in walkdir(labels_dir)
-        label_filepaths = joinpath.(
-            labels_dir,
-            filter(x -> occursin(".xml", x), files),
-        )
+        filter!(x -> endswith(x,".xml") && !startswith(x,"."), files)
+        label_filepaths = joinpath.(labels_dir, files)
         image_filepaths = joinpath.(
             images_dir,
             map(x -> string(first(split(x, ".xml")), ".jpg"), files),
