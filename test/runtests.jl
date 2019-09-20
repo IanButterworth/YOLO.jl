@@ -102,5 +102,8 @@ end
     end
 
     enable_info()
-    @info "YOLO_v2_tiny inference time per image: $(round(inference_time, digits=2)) seconds ($(round(inference_rate, digits=2)) fps)"
+    @info "YOLO_v2_tiny inference time per image: $(round(inference_time, digits=4)) seconds ($(round(inference_rate, digits=2)) fps)"
+    @info "YOLO_v2_tiny postprocess time per image: $(round(postprocess_time, digits=4)) seconds ($(round(postprocess_rate, digits=2)) fps)"
+    @info "Total time per image: $(round(inference_time + postprocess_time, digits=2)) seconds ($(round(1/(inference_time + postprocess_time), digits=2)) fps)"
+
 end
