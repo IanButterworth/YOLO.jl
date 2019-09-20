@@ -7,32 +7,32 @@ Post processing function.
 Confidence score threshold to select correct predictions. Recommended : 0.3
 IoU threshold to remove unnecessary predictions: Recommended:0.3
 """
-function postprocess(yolomat::xtype,settings::Settings; conf_thresh::T = 0.3, iou_thresh::T = 0.3) where {T<:AbstractFloat}
+function postprocess(yolomat::Array{Float32},settings::Settings; conf_thresh::T = 0.3, iou_thresh::T = 0.3) where {T<:AbstractFloat}
     im_w = settings.image_shape[1]
     im_h = settings.image_shape[2]
     num_images = size(yolomat,4)
     all_detections = map(x->PredictLabel[],1:num_images)
     RATE = 32
-    @views for i in 1:num_images
+    for i in 1:num_images
         for cy in 1:13
             for cx in 1:13
-                for b in 1:5
+                @views for b in 1:5
                     channel = (b-1)*(settings.num_classes + 5)
                     tx = yolomat[cy,cx,channel+1,i]
                     ty = yolomat[cy,cx,channel+2,i]
                     tw = yolomat[cy,cx,channel+3,i]
                     th = yolomat[cy,cx,channel+4,i]
                     tc = yolomat[cy,cx,channel+5,i]
-                    x = Float32((sigmoid(tx) + cx-1) * RATE)
-                    y = Float32((sigmoid(ty) + cy-1) * RATE)
-                    w = Float32(exp(tw) * (settings.anchors[b][1]) * RATE)
-                    h = Float32(exp(th) * (settings.anchors[b][2]) * RATE)
-                    conf = Float32(sigmoid(tc))
-                    classScores = Array{Float32}(yolomat[cy,cx,channel+6:channel+25,i])
+                    x = (sigmoid(tx) + cx-1) * RATE
+                    y = (sigmoid(ty) + cy-1) * RATE
+                    w = exp(tw) * settings.anchors[b][1] * RATE
+                    h = exp(th) * settings.anchors[b][2] * RATE
+                    conf = sigmoid(tc)
+                    classScores = yolomat[cy,cx,channel+6:channel+25,i]
                     classScores = softmax(classScores)
                     classNo = argmax(classScores)
                     bestScore = classScores[classNo]
-                    classConfidenceScore = conf*bestScore
+                    classConfidenceScore = conf * bestScore
                     if classConfidenceScore > conf_thresh
                         bbox = BBOX(
                             x = max(0.0,x-w/2)/im_w,
@@ -53,7 +53,9 @@ function postprocess(yolomat::xtype,settings::Settings; conf_thresh::T = 0.3, io
         return all_detections
     end
 end
-
+function postprocess(yolomat::KnetArray{Float32}, settings::Settings; conf_thresh::T = 0.3, iou_thresh::T = 0.3) where {T<:AbstractFloat}
+    postprocess(Array{Float32}(yolomat), settings; conf_thresh = conf_thresh, iou_thresh = iou_thresh)
+end
 """
     nonMaxSupression!(detections::Vector{PredictLabel}, iou_thresh::Float32)
 
@@ -63,7 +65,7 @@ function nonMaxSupression!(detections::Vector{PredictLabel}, iou_thresh::T) wher
     sort!(detections, by = x -> x.conf, rev = true)
     for i = 1:length(detections)
         k = i + 1
-        while k <= length(detections)
+        @views while k <= length(detections)
             iou = ioumatch(detections[i].bbox, detections[k].bbox)
             if iou > iou_thresh && (detections[i].class == detections[k].class)
                 deleteat!(detections, k)

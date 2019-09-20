@@ -93,13 +93,21 @@ end
     inference_rate = 1 / inference_time
     @test inference_time < 1.0 #seconds
 
-    predictions = YOLO.postprocess(res, settings, conf_thresh = 0.1, iou_thresh = 0.3)
+    predictions = YOLO.postprocess(res, settings, conf_thresh = 0.3, iou_thresh = 0.3)
 
-    if false #disabled because Makie can't be tested on headless CI
-        scene = YOLO.renderResult(vocloaded.imstack_mat[:,:,:,1], predictions[1], settings, save_file = "test.png")
-        @test isfile("test.png")
-        rm("test.png", force=true)
+    t = @elapsed for i in 1:10
+        YOLO.postprocess(res, settings, conf_thresh = 0.3, iou_thresh = 0.3)
     end
+
+    postprocess_time = (t / 10) / num_images
+    postprocess_rate = 1 / postprocess_time
+    @test postprocess_time < 1.0 #seconds
+
+    ## Makie Tests
+    #disabled because Makie can't be tested on headless CI
+    # scene = YOLO.renderResult(vocloaded.imstack_mat[:,:,:,1], predictions[1], settings, save_file = "test.png")
+    # @test isfile("test.png")
+    # rm("test.png", force=true)
 
     enable_info()
     @info "YOLO_v2_tiny inference time per image: $(round(inference_time, digits=4)) seconds ($(round(inference_rate, digits=2)) fps)"
