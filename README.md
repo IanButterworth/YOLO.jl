@@ -1,6 +1,6 @@
 # YOLO.jl
 
-Currently only supports loading YOLOv2-tiny and the VOC pretrained model (pretrained by Darknet).
+Currently only supports loading [YOLOv2-tiny](https://github.com/pjreddie/darknet/blob/master/cfg/yolov2-tiny.cfg) and the [VOC-2007](http://host.robots.ox.ac.uk/pascal/VOC/voc2007/) pretrained model (pretrained on [Darknet](https://pjreddie.com/darknet/).
 
 The majority of this is made possible by Yavuz Bakman's great work in https://github.com/Ybakman/YoloV2
 
@@ -58,14 +58,16 @@ display(scene)
 
 
 ### Testing inference speed
+
+#### Model + post-process
 ```julia
 using BenchmarkTools
-@btime begin
+@benchmark begin
   res = model(vocloaded.imstack_mat);
   predictions = YOLO.postprocess(res, settings, conf_thresh = 0.3, iou_thresh = 0.3)
 end
 ```
-Results on a modern macbook. CPU-only:
+Results for model + postprocess on a modern macbook. CPU-only: ~10 FPS
 ```
 BenchmarkTools.Trial:
   memory estimate:  124.39 MiB
@@ -79,7 +81,26 @@ BenchmarkTools.Trial:
   samples:          44
   evals/sample:     1
 ```
-i.e. ~10 FPS
+
+#### Model only
+```julia
+using BenchmarkTools
+@benchmark model(vocloaded.imstack_mat)
+```
+Results for model-only on a desktop with Gtx 1070 GPU: ~267 FPS
+```
+BenchmarkTools.Trial: 
+  memory estimate:  56.92 KiB
+  allocs estimate:  1442
+  --------------
+  minimum time:     375.116 μs (0.00% GC)
+  median time:      3.740 ms (0.00% GC)
+  mean time:        3.738 ms (2.65% GC)
+  maximum time:     10.810 ms (0.00% GC)
+  --------------
+  samples:          1337
+  evals/sample:     1
+```
 
 
 
