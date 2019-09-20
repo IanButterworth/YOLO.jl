@@ -35,28 +35,6 @@ end
     @test length(voc.image_paths) == 5011
     @test length(voc.label_paths) == 5011
     @test length(voc.objects) == 20
-    @test_skip voc.objectcounts == [
-        306,
-        353,
-        486,
-        290,
-        505,
-        229,
-        1250,
-        376,
-        798,
-        259,
-        215,
-        510,
-        362,
-        339,
-        4690,
-        514,
-        257,
-        248,
-        297,
-        324,
-    ]
 
     settings = YOLO.pretrained.v2_tiny_voc.load(minibatch_size = num_images)
     @test settings.num_classes == 20
@@ -66,7 +44,7 @@ end
     @test length(vocloaded.paddings) == num_images
     @test length(vocloaded.labels) == num_images
     #Checks that the VOC download hasn't changed
-    @test_skip vec(sum(vocloaded.imstack_mat, dims = (1, 2, 3))) ≈ [
+    @test vec(sum(vocloaded.imstack_mat, dims = (1, 2, 3))) ≈ [
         140752.47,
         122024.16,
         126477.125,
@@ -77,7 +55,7 @@ end
         83476.43,
         132382.72,
         166430.16,
-    ]
+    ][1:num_images]
 
     model = YOLO.v2_tiny.load(settings)
     YOLO.loadWeights!(model, settings)
