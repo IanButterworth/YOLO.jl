@@ -111,7 +111,7 @@ BenchmarkTools.Trial:
 [travis-img]: https://travis-ci.com/ianshmean/YOLO.jl.svg?branch=master
 [travis-url]: https://travis-ci.com/ianshmean/YOLO.jl
 
-[appveyor-img]: https://ci.appveyor.com/api/projects/status/c1nc5aavymq76xun?svg=true
+[appveyor-img]: https://ci.appveyor.com/api/projects/status/github/ianshmean/YOLO.jl?svg=true
 [appveyor-url]: https://ci.appveyor.com/project/ianshmean/YOLO-jl
 
 [drone-img]: https://cloud.drone.io/api/badges/ianshmean/YOLO.jl/status.svg
