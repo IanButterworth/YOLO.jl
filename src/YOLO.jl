@@ -59,6 +59,9 @@ Base.@kwdef mutable struct Settings
     anchors::Array{Tuple{Float64,Float64}}
     num_classes::Int
     minibatch_size::Int = 1
+    grid_x::Int
+    grid_y::Int
+    cell_bboxes::Int
 end
 
 Base.@kwdef mutable struct LoadedDataset
