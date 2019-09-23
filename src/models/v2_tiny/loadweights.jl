@@ -3,6 +3,8 @@
 
 import ..GPU
 
+import ..YOLO: loadWeights!
+
 export loadWeights!
 
 """
