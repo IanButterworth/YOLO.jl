@@ -25,6 +25,9 @@ From the Julia REPL, type `]` to enter the Pkg REPL mode and run:
 ```
 pkg> add YOLO
 ```
+If you have a CUDA-supported graphics card, make sure that you have CUDA set up such that it satisfies [CUDAapi.jl](https://github.com/JuliaGPU/CUDAapi.jl) or [CuArrays.jl](https://github.com/JuliaGPU/CuArrays.jl) builds.
+
+If you just want to run on CPU (or on a GPU-less CI instance) Knet.jl is currently dependent on a system compiler for the GPU-less conv layer, so make sure you have a compiler installed: i.e. ```apt-get update && apt-get install gcc g++``` for linux or install visual studio for windows
 
 ## Example Usage (WIP)
 
@@ -102,10 +105,6 @@ An i7 desktop with a GTX 1070 GPU:
 [ Info: YOLO_v2_tiny postprocess time per image: 0.0024 seconds (425.51 fps)
 [ Info: Total time per image: 0.0063 seconds (159.36 fps)
 ```
-
-
-
-
 
 [discourse-tag-url]: https://discourse.julialang.org/tags/yolo
 
