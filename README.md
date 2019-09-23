@@ -23,10 +23,12 @@ The package can be installed with the Julia package manager.
 From the Julia REPL, type `]` to enter the Pkg REPL mode and run:
 
 ```
-pkg> add https://github.com/ianshmean/YOLO.jl
+pkg> add YOLO
 ```
 
 ## Example Usage (WIP)
+
+### Testing a dataset
 ```julia
 using YOLO
 
@@ -47,6 +49,33 @@ res = model(vocloaded.imstack_mat);
 predictions = YOLO.postprocess(res, settings, conf_thresh = 0.3, iou_thresh = 0.3)
 ```
 
+### Testing a single custom image 
+To pass an image through, the image needs to be loaded, and scaled to the appropriate input size.
+For YOLOv2-tiny that would be `(w, h, color_channels, minibatch_size) == (416, 416, 3, 1)`.
+
+`loadResizePadImageToFit` can be used to load, resize & pad the image, while maintaining aspect ratio and anti-aliasing during the resize process. 
+```julia
+using YOLO
+## Load once
+settings = YOLO.pretrained.v2_tiny_voc.load(minibatch_size=1) #run 1 image at a time
+model = YOLO.v2_tiny.load(settings)
+YOLO.loadWeights!(model, settings)
+
+## Run for each image
+imgmat = YOLO.loadResizePadImageToFit("image.jpeg", settings)
+res = model(imgmat)
+predictions = YOLO.postprocess(res, settings, conf_thresh = 0.3, iou_thresh = 0.3)
+```
+
+or if the image is already in memory
+```
+imgmat = loadResizePadImageToFit(img, settings)
+res = model(imgmat)
+predictions = YOLO.postprocess(res, settings, conf_thresh = 0.3, iou_thresh = 0.3)
+```
+
+
+
 ### Rendering results
 To render results, first load `Makie` before `YOLO` (in a fresh julia instance):
 ```julia
@@ -59,47 +88,19 @@ display(scene)
 
 ### Testing inference speed
 
-#### Model + post-process
-```julia
-using BenchmarkTools
-@benchmark begin
-  res = model(vocloaded.imstack_mat);
-  predictions = YOLO.postprocess(res, settings, conf_thresh = 0.3, iou_thresh = 0.3)
-end
+The package tests include a small benchmark.
+A 2018 macbook pro i7. CPU-only:
 ```
-Results for model + postprocess on a modern macbook. CPU-only: ~10 FPS
-```
-BenchmarkTools.Trial:
-  memory estimate:  124.39 MiB
-  allocs estimate:  12953
-  --------------
-  minimum time:     97.784 ms (13.12% GC)
-  median time:      115.836 ms (11.17% GC)
-  mean time:        115.455 ms (13.33% GC)
-  maximum time:     137.506 ms (7.29% GC)
-  --------------
-  samples:          44
-  evals/sample:     1
+[ Info: YOLO_v2_tiny inference time per image: 0.1313 seconds (7.62 fps)
+[ Info: YOLO_v2_tiny postprocess time per image: 0.0023 seconds (444.07 fps)
+[ Info: Total time per image: 0.1336 seconds (7.49 fps)
 ```
 
-#### Model only
-```julia
-using BenchmarkTools
-@benchmark model(vocloaded.imstack_mat)
+An i7 desktop with a GTX 1070 GPU:
 ```
-Results for model-only on a desktop with Gtx 1070 GPU: ~267 FPS
-```
-BenchmarkTools.Trial: 
-  memory estimate:  56.92 KiB
-  allocs estimate:  1442
-  --------------
-  minimum time:     375.116 μs (0.00% GC)
-  median time:      3.740 ms (0.00% GC)
-  mean time:        3.738 ms (2.65% GC)
-  maximum time:     10.810 ms (0.00% GC)
-  --------------
-  samples:          1337
-  evals/sample:     1
+[ Info: YOLO_v2_tiny inference time per image: 0.0039 seconds (254.79 fps)
+[ Info: YOLO_v2_tiny postprocess time per image: 0.0024 seconds (425.51 fps)
+[ Info: Total time per image: 0.0063 seconds (159.36 fps)
 ```
 
 
