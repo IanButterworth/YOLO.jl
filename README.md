@@ -4,7 +4,12 @@ Currently only supports loading [YOLOv2-tiny](https://github.com/pjreddie/darkne
 
 The majority of this is made possible by Yavuz Bakman's great work in https://github.com/Ybakman/YoloV2
 
-**Docs**
+<p float="left">
+<img src="examples/boat.png" alt="drawing" width="200"/>
+<img src="examples/bikes.png" alt="bikes" width="200"/>
+<img src="examples/cowcat.png" alt="cowcat" width="200"/>
+<img src="examples/cars.png" alt="cars" width="200"/>
+</p>
 
 See below for examples or ask questions on [![Join the julia slack](https://img.shields.io/badge/slack-%23machine--learning-yellow)](https://slackinvite.julialang.org)
 
