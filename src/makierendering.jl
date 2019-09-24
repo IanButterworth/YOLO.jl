@@ -15,7 +15,8 @@ function renderResult(img::Array{Float32}, predictions::Vector{YOLO.PredictLabel
     for p in predictions
         col = cols[p.class]
         rect = [p.bbox.y*img_h, p.bbox.x*img_w, p.bbox.h*img_h, p.bbox.w*img_w]
-        Makie.poly!(scene, [Rectangle{Float32}(rect...)], color=RGBA(red(col),blue(col),green(col),clamp(p.conf*1.3,0.2,0.6)))
+        Makie.lines!(Rectangle(rect...), linewidth = 8, color=RGBA(red(col),blue(col),green(col),clamp(p.conf*1.3,0.5,1.0)))
+        #Makie.poly!(scene, [Rectangle{Float32}(rect...)], color=RGBA(red(col),blue(col),green(col),clamp(p.conf*1.3,0.2,0.6)))
         name = get(settings.numsdic,p.class,"")
         conf_rounded = round(p.conf, digits=2)
         Makie.text!(scene, "$name\n$(conf_rounded)",
