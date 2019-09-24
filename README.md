@@ -11,8 +11,6 @@ The majority of this is made possible by Yavuz Bakman's great work in https://gi
 <img src="examples/cars.png" alt="cars" width="200"/>
 </p>
 
-**Docs**
-
 See below for examples or ask questions on [![Join the julia slack](https://img.shields.io/badge/slack-%23machine--learning-yellow)](https://slackinvite.julialang.org)
 
 | **Platform**                                                               | **Build Status**                                                                                |
