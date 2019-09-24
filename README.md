@@ -8,6 +8,7 @@ The majority of this is made possible by Yavuz Bakman's great work in https://gi
 <img src="examples/boat.png" alt="drawing" width="200"/>
 <img src="examples/bikes.png" alt="bikes" width="200"/>
 <img src="examples/cowcat.png" alt="cowcat" width="200"/>
+<img src="examples/cars.png" alt="cars" width="200"/>
 </p>
 
 **Docs**
