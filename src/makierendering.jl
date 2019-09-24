@@ -13,17 +13,27 @@ function renderResult(img::Array{Float32}, predictions::Vector{YOLO.PredictLabel
     Makie.rotate!(scene, -0.5pi)
 
     for p in predictions
+        alpha = clamp(p.conf,0.5,1.0)
         col = cols[p.class]
-        rect = [p.bbox.y*img_h, p.bbox.x*img_w, p.bbox.h*img_h, p.bbox.w*img_w]
-        Makie.lines!(Rectangle(rect...), linewidth = 8, color=RGBA(red(col),blue(col),green(col),clamp(p.conf*1.3,0.5,1.0)))
-        #Makie.poly!(scene, [Rectangle{Float32}(rect...)], color=RGBA(red(col),blue(col),green(col),clamp(p.conf*1.3,0.2,0.6)))
+        pcol = RGBA(red(col),blue(col),green(col),alpha)
+        x = p.bbox.x*img_w
+        y = p.bbox.y*img_h
+        w = p.bbox.w*img_w
+        h = p.bbox.h*img_h
+        points = [
+            Point(y,x+w) => Point(y+h,x+w);
+            Point(y,x) => Point(y+h,x);
+            Point(y+h,x+w) => Point(y+h,x);
+            Point(y,x+w) => Point(y,x);
+            ]
+        Makie.linesegments!(points, linewidth = 8, color=pcol)
         name = get(settings.numsdic,p.class,"")
         conf_rounded = round(p.conf, digits=2)
         Makie.text!(scene, "$name\n$(conf_rounded)",
-             position = (rect[1], rect[2]),
+             position = (y+3, x+3),
              align = (:left,  :top),
-             colo = :black,
-             textsize = 6,
+             color = pcol,
+             textsize = 8,
              font = "Dejavu Sans"
          )
     end
