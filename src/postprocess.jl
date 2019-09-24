@@ -11,9 +11,10 @@ function postprocess(yolomat::Array{Float32},settings::Settings; conf_thresh::T 
     im_w = settings.image_shape[1]
     im_h = settings.image_shape[2]
     num_images = size(yolomat,4)
-    all_detections = map(x->PredictLabel[],1:num_images)
+    all_detections = Vector{Vector{PredictLabel}}(undef, num_images)
     RATE = 32
     for i in 1:num_images
+        all_detections[i] = PredictLabel[]
         for cy in 1:13
             for cx in 1:13
                 @views for b in 1:5
