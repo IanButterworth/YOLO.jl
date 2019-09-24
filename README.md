@@ -11,11 +11,12 @@ See below for examples or ask questions on [![Join the julia slack](https://img.
 | **Platform**                                                               | **Build Status**                                                                                |
 |:-------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------:|
 | Linux & MacOS x86 | [![][travis-img]][travis-url] |
-| Windows 32/64-bit | [![][appveyor-img]][appveyor-url] |
+| Windows 32/64-bit | CI disabled* |
 | Linux ARM 32/64-bit | [![][drone-img]][drone-url] |
-| FreeBSD x86 | [![][cirrus-img]][cirrus-url] |
+| FreeBSD x86 | CI disabled* |
 |  | [![Codecoverage Status][codecov-img]][codecov-url]<br>[![Coveralls Status][coveralls-img]][coveralls-url] |
 
+* CPU-only operation of Knet conv layers requires a compiler, which the CI images for FreeBSD and Windows don't have (and takes too long to install)
 
 ## Installation
 
@@ -52,11 +53,11 @@ res = model(vocloaded.imstack_mat);
 predictions = YOLO.postprocess(res, settings, conf_thresh = 0.3, iou_thresh = 0.3)
 ```
 
-### Testing a single custom image 
+### Testing a single custom image
 To pass an image through, the image needs to be loaded, and scaled to the appropriate input size.
 For YOLOv2-tiny that would be `(w, h, color_channels, minibatch_size) == (416, 416, 3, 1)`.
 
-`loadResizePadImageToFit` can be used to load, resize & pad the image, while maintaining aspect ratio and anti-aliasing during the resize process. 
+`loadResizePadImageToFit` can be used to load, resize & pad the image, while maintaining aspect ratio and anti-aliasing during the resize process.
 ```julia
 using YOLO
 ## Load once
