@@ -1,3 +1,5 @@
+# using Pkg
+# Pkg.add(PackageSpec(name="Knet", rev="master"))
 
 weightsdir = joinpath(@__DIR__, "..", "data", "pretrained")
 

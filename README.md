@@ -16,12 +16,11 @@ See below for examples or ask questions on [![Join the julia slack](https://img.
 | **Platform**                                                               | **Build Status**                                                                                |
 |:-------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------:|
 | Linux & MacOS x86 | [![][travis-img]][travis-url] |
-| Windows 32/64-bit | CI disabled* |
+| Windows 32/64-bit | [![][appveyor-img]][appveyor-url] |
 | Linux ARM 32/64-bit | [![][drone-img]][drone-url] |
-| FreeBSD x86 | CI disabled* |
+| FreeBSD x86 | [![][cirrus-img]][cirrus-url] |
 |  | [![Codecoverage Status][codecov-img]][codecov-url]<br>[![Coveralls Status][coveralls-img]][coveralls-url] |
 
-* CPU-only operation of Knet conv layers requires a compiler, which the CI images for FreeBSD and Windows don't have (and takes too long to install)
 
 ## Installation
 

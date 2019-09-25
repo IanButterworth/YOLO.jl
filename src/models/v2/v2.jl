@@ -1,3 +1,8 @@
+####
+# NOT FUNCTIONAL
+#TODO: Convert this to v2 model - This will not work for v2
+####
+
 module v2
 #Tiny Yolo V2 model configuration
 
