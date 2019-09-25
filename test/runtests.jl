@@ -69,9 +69,18 @@ end
 
     inference_time = (t / 10) / num_images
     inference_rate = 1 / inference_time
-    @test inference_time < 1.0 #seconds
 
     predictions = YOLO.postprocess(res, settings, conf_thresh = 0.3, iou_thresh = 0.3)
+    @test length(predictions) == num_images # images
+    @test length(predictions[1]) == 0
+    @test length(predictions[2]) == 1
+
+    @test isapprox(predictions[2][1].bbox.x, 0.23406872f0, rtol=0.05)
+    @test isapprox(predictions[2][1].bbox.y, 0.28794688f0, rtol=0.05)
+    @test isapprox(predictions[2][1].bbox.w, 0.8048826f0, rtol=0.05)
+    @test isapprox(predictions[2][1].bbox.h, 0.46979588f0, rtol=0.05)
+    @test predictions[2][1].class == 7
+    @test isapprox(predictions[2][1].conf, 0.5042128f0, rtol=0.05)
 
     t = @elapsed for i in 1:10
         YOLO.postprocess(res, settings, conf_thresh = 0.3, iou_thresh = 0.3)
@@ -79,7 +88,6 @@ end
 
     postprocess_time = (t / 10) / num_images
     postprocess_rate = 1 / postprocess_time
-    @test postprocess_time < 1.0 #seconds
 
     ## Makie Tests
     #disabled because Makie can't be tested on headless CI

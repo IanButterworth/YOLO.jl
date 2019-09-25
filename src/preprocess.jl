@@ -42,11 +42,9 @@ end
 Load image and reesize it to fit inside the target image shap, while maintaining
 aspect ratio and preventing aliasing.
 """
-function loadResizePadImageToFit(
-    img_path::String,
-    sets::Settings
-)
-    img = FileIO.load(img_path)
+loadResizePadImageToFit(img_path::String, sets::Settings) =
+    loadResizePadImageToFit(FileIO.load(img_path), sets)
+function loadResizePadImageToFit(img::T, sets::Settings) where {T<:AbstractArray}
     img_size = size(img)
     target_img_size = sizethatfits(img_size, sets.image_shape)
     kern = resizekern(img_size, target_img_size)
@@ -69,10 +67,14 @@ function resizePadImageToFit(
     },
 ) where {T<:ColorTypes.Color}
 
-    imgr = ImageTransformations.imresize(
-        ImageFiltering.imfilter(img, kern, NA()),
-        target_img_size,
-    )
+    if size(img,1) > target_img_size[1] #Apply blur first if reducing size, to avoid aliasing
+        imgr = ImageTransformations.imresize(
+            ImageFiltering.imfilter(img, kern, NA()),
+            target_img_size,
+        )
+    else
+        imgr = ImageTransformations.imresize(img, target_img_size)
+    end
 
     # Determine top and left padding
     vpad_top = floor(Int, (settings.image_shape[1] - target_img_size[1]) / 2)

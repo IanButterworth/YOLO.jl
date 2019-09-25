@@ -1,7 +1,11 @@
-#Author: Yavuz Faruk Bakman
-#Date: 15/08/2019
+####
+# NOT FUNCTIONAL
+#TODO: Convert this to v2 model - This will not work for v2
+####
+
 
 import ..GPU
+
 
 import ..YOLO: loadWeights!
 
@@ -34,11 +38,11 @@ function updateconv!(c, gamma, mean, variance)
 end
 
 """
-    loadWeights!(model::YOLO.v2_tiny.v2TinyChain, weights_filepath::String)
+    loadWeights!(model::YOLO.v2_tiny.v2Chain, weights_filepath::String)
 
 Loads layers' weights from given weights file path.
 """
-function loadWeights!(model::v2TinyChain, settings::Settings)
+function loadWeights!(model::v2Chain, settings::Settings)
     outlength = settings.cell_bboxes * (5 + settings.num_classes)
 
     open(settings.weights_filepath, "r") do io
