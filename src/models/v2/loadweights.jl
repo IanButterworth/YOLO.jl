@@ -59,40 +59,40 @@ function loadWeights!(model::Chain_layers, settings::Settings, nr_constants = 4)
         loadconv!(model.layers[1].layers[7], io, 3, 3, 64, 128)#65
         #6th Conv layer
         loadconv!(model.layers[1].layers[9], io, 3, 3, 128, 256)#77
-		#7th Conv layer
+	#7th Conv layer
         loadconv!(model.layers[1].layers[10], io, 1, 1, 256, 128)#85
-		#8th Conv layer
+	#8th Conv layer
         loadconv!(model.layers[1].layers[11], io, 3, 3, 128, 256)#93
-		#9th Conv layer
+	#9th Conv layer
         loadconv!(model.layers[1].layers[13], io, 3, 3, 256, 512)#105
-		#10th Conv layer
+	#10th Conv layer
         loadconv!(model.layers[1].layers[14], io, 1, 1, 512, 256)#113
-		#11th Conv layer
+	#11th Conv layer
         loadconv!(model.layers[1].layers[15], io, 3, 3, 256, 512)#121
-		#12th Conv layer
+	#12th Conv layer
         loadconv!(model.layers[1].layers[16], io, 1, 1, 512, 256)#129
-		#13th Conv layer
+	#13th Conv layer
         loadconv!(model.layers[1].layers[17], io, 3, 3, 256, 512)#137
-		#14th Conv layer
+	#14th Conv layer
         loadconv!(model.layers[2].layers[2], io, 3, 3, 512, 1024)#149
-		#15th Conv layer
+	#15th Conv layer
         loadconv!(model.layers[2].layers[3], io, 1, 1, 1024, 512)#157
-		#16th Conv layer
+	#16th Conv layer
         loadconv!(model.layers[2].layers[4], io, 3, 3, 512, 1024)#165
-		#17th Conv layer
+	#17th Conv layer
         loadconv!(model.layers[2].layers[5], io, 1, 1, 1024, 512)#173
-		#18th Conv layer
+	#18th Conv layer
         loadconv!(model.layers[2].layers[6], io, 3, 3, 512, 1024)#181
-		#19th Conv layer
+	#19th Conv layer
         loadconv!(model.layers[2].layers[7], io, 3, 3, 1024, 1024)#192
-		#20th Conv layer
+	#20th Conv layer
         loadconv!(model.layers[2].layers[8], io, 3, 3, 1024, 1024)#200
-		#21st Conv layer
+	#21st Conv layer
         loadconv!(model.layers[3].layers[1], io, 1, 1, 512, 64)#211
-		#22nd Conv layer
+	#22nd Conv layer
         loadconv!(model.layers[4].layers[1], io, 3, 3, 1280, 1024)#225
-		#23rd Conv layer
-        loadconv_last!(model.layers[4].layers[2], io, 1, 1, 1024, 125)#233
+	#23rd Conv layer
+        loadconv_last!(model.layers[4].layers[2], io, 1, 1, 1024, 125)#233 no batch norm here
         if GPU >= 0
           end
     # end
@@ -122,6 +122,8 @@ function loadconv!(c, io::IOStream, d1, d2, d3, d4)
         c.b = KnetArray(c.b)
     end
 end
+
+# to be simplified. the weights file does not have batch norm data for the last layer
 function loadconv_last!(c, io::IOStream, d1, d2, d3, d4)
     read!(io, c.b)
     toRead = Array{Float32}(undef, d4 * d3 * d2 * d1)
