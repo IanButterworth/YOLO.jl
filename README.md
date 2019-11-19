@@ -93,7 +93,7 @@ predictions = YOLO.postprocess(res, settings, conf_thresh = 0.3, iou_thresh = 0.
 
 or manually resize and reshape
 ```
-using Images
+using Images, Makie
 img = load("image.jpg");
 img1 = imresize(img,416,416);
 img2 = Float32.(channelview(img1))
@@ -101,6 +101,7 @@ img3 = permutedims(img2,[2,3,1])
 imgmat = reshape(img3,size(img3)...,1)
 res = model(imgmat)
 predictions = YOLO.postprocess(res, settings, conf_thresh = 0.3, iou_thresh = 0.3)
+scene = YOLO.renderResult(img3, predictions, settings, save_file = "test.png")
 ```
 
 
