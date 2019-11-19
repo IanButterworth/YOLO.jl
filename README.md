@@ -2,6 +2,7 @@
 # Forked from https://github.com/ianshmean/YOLO.jl
 Full credits go to https://github.com/ianshmean and https://github.com/Ybakman. This copy is used for experimenting with YOLOv2 reorg and concat layers, as well as loss function definition.
 
+* Loading YOLOV2-VOC (https://github.com/pjreddie/darknet/blob/master/cfg/yolov2-voc.cfg) is now possible.
 Currently only supports loading [YOLOv2-tiny](https://github.com/pjreddie/darknet/blob/master/cfg/yolov2-tiny.cfg) and the [VOC-2007](http://host.robots.ox.ac.uk/pascal/VOC/voc2007/) pretrained model (pretrained on [Darknet](https://pjreddie.com/darknet/)).
 
 The majority of this is made possible by Yavuz Bakman's great work in https://github.com/Ybakman/YoloV2
@@ -45,9 +46,16 @@ using YOLO
 #First time only (downloads 5011 images & labels!)
 YOLO.download_dataset("voc2007")
 
+# V2_tiny
 settings = YOLO.pretrained.v2_tiny_voc.load(minibatch_size=1) #run 1 image at a time
 model = YOLO.v2_tiny.load(settings)
 YOLO.loadWeights!(model, settings)
+
+# V2
+settings = YOLO.pretrained.v2_voc.load(minibatch_size=1)
+model = YOLO.v2.load(settings)
+nr_constants = 5 # nr of constants at the beginning of weights file
+YOLO.loadWeights!(model, settings, nr_constants)
 
 voc = YOLO.datasets.VOC.populate()
 vocloaded = YOLO.load(voc, settings, indexes = [100]) #load image #100 (a single image)
@@ -61,15 +69,21 @@ predictions = YOLO.postprocess(res, settings, conf_thresh = 0.3, iou_thresh = 0.
 
 ### Testing a single custom image
 To pass an image through, the image needs to be loaded, and scaled to the appropriate input size.
-For YOLOv2-tiny that would be `(w, h, color_channels, minibatch_size) == (416, 416, 3, 1)`.
+For YOLOv2-tiny and YOLOv2 that would be `(w, h, color_channels, minibatch_size) == (416, 416, 3, 1)`.
 
 `loadResizePadImageToFit` can be used to load, resize & pad the image, while maintaining aspect ratio and anti-aliasing during the resize process.
 ```julia
 using YOLO
-## Load once
+## Load once V2_tiny
 settings = YOLO.pretrained.v2_tiny_voc.load(minibatch_size=1) #run 1 image at a time
 model = YOLO.v2_tiny.load(settings)
 YOLO.loadWeights!(model, settings)
+
+## OR Load once V2
+settings = YOLO.pretrained.v2_voc.load(minibatch_size=1)
+model = YOLO.v2.load(settings)
+nr_constants = 5 # nr of constants at the beginning of weights file
+YOLO.loadWeights!(model, settings, nr_constants)
 
 ## Run for each image
 imgmat = YOLO.loadResizePadImageToFit("image.jpeg", settings)
