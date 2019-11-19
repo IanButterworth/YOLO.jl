@@ -1,8 +1,3 @@
-####
-# NOT FUNCTIONAL
-#TODO: Convert this to v2 model - This will not work for v2
-####
-
 module v2
 #Tiny Yolo V2 model configuration
 
@@ -58,7 +53,7 @@ struct Chain_layers; layers; Chain_layers(args...)=new(args); end
 function (c::Chain_layers)(img)
     res_1_17   = c.layers[1](img)
     res_18_25  = c.layers[2](res_1_17)
-	res_26_27  = c.layers[3](res_1_17)
+    res_26_27  = c.layers[3](res_1_17)
     res_28     = reorg(res_26_27, 2)
     res_29     = concat(res_28, res_18_25)
     res_30_31  = c.layers[4](res_29)
