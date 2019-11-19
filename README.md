@@ -2,8 +2,8 @@
 # Forked from https://github.com/ianshmean/YOLO.jl
 Full credits go to https://github.com/ianshmean and https://github.com/Ybakman. This copy is used for experimenting with YOLOv2 reorg and concat layers, as well as loss function definition.
 
-* Loading YOLOV2-VOC (https://github.com/pjreddie/darknet/blob/master/cfg/yolov2-voc.cfg) is now possible.
-Currently only supports loading [YOLOv2-tiny](https://github.com/pjreddie/darknet/blob/master/cfg/yolov2-tiny.cfg) and the [VOC-2007](http://host.robots.ox.ac.uk/pascal/VOC/voc2007/) pretrained model (pretrained on [Darknet](https://pjreddie.com/darknet/)).
+* Update: Loading YOLOv2-VOC (https://github.com/pjreddie/darknet/blob/master/cfg/yolov2-voc.cfg) is now possible along with the pretrained weights. Please check the example below for using the model.
+* Loading [YOLOv2-tiny](https://github.com/pjreddie/darknet/blob/master/cfg/yolov2-tiny.cfg) and the [VOC-2007](http://host.robots.ox.ac.uk/pascal/VOC/voc2007/) pretrained model (pretrained on [Darknet](https://pjreddie.com/darknet/)) is possible.
 
 The majority of this is made possible by Yavuz Bakman's great work in https://github.com/Ybakman/YoloV2
 
