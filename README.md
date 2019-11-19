@@ -91,9 +91,14 @@ res = model(imgmat)
 predictions = YOLO.postprocess(res, settings, conf_thresh = 0.3, iou_thresh = 0.3)
 ```
 
-or if the image is already in memory
+or manually resize and reshape
 ```
-imgmat = loadResizePadImageToFit(img, settings)
+using Images
+img = load("image.jpg");
+img1 = imresize(img,416,416);
+img2 = Float32.(channelview(img1))
+img3 = permutedims(img2,[2,3,1])
+imgmat = reshape(img3,size(img3)...,1)
 res = model(imgmat)
 predictions = YOLO.postprocess(res, settings, conf_thresh = 0.3, iou_thresh = 0.3)
 ```
