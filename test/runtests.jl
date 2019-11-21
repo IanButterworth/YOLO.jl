@@ -1,103 +1,50 @@
-using YOLO, Test
+using YOLO
+using Test, BenchmarkTools, DataFrames
+using FileIO, ImageCore, ImageTransformations
 
-enable_info() = Base.CoreLogging.disable_logging(Base.CoreLogging.LogLevel(-1)) #Enable printing of @info messages
-disable_info() = Base.CoreLogging.disable_logging(Base.CoreLogging.Info) #disable printing of @info messages
+df = DataFrame(model=String[], load=Bool[], load_time=Float64[], run=Bool[], forwardpass_time=Float64[], objects_detected=Int64[])
+@testset "Load and Run all supported YOLO models" begin
+    global df
+    prepareimage(img, w, h) = gpu(reshape(permutedims(Float32.(channelview(imresize(img, w, h))[1:3,:,:]), [3,2,1]), h, w, 3, 1))
 
-disable_info()
-datadir = joinpath(dirname(dirname(pathof(YOLO))), "data")
-datasetsdir = joinpath(datadir, "datasets")
-pretraineddir = joinpath(datadir, "pretrained")
+    pkgdir = dirname(@__DIR__)
 
-if !isdir(joinpath(datasetsdir, "voc2007", "VOCdevkit", "VOC2007"))
-    @info "Downloading VOC dataset for testing..."
-    YOLO.download_dataset("voc2007")
-end
+    modelsAndWeights = [
+                    ("yolov2-tiny", "yolov2-tiny-COCO", 18),
+                    #("yolov2-608", "yolov2-COCO", 0),
+                    ("yolov3-tiny", "yolov3-tiny-COCO", 2),
+                    ("yolov3-320", "yolov3-COCO", 1),
+                    ("yolov3-416", "yolov3-COCO", 3),
+                    ("yolov3-608", "yolov3-COCO", 1),
+                    #("yolov3-spp", "yolov3-spp-COCO", 0)
+                    ]
+    IMG = load(joinpath(@__DIR__,"images","dog-cycle-car.png"))
 
-@testset "Example datasets have been downloaded" begin
-    @test isdir(joinpath(datasetsdir, "voc2007", "VOCdevkit", "VOC2007"))
-end
+    for (i, modelAndWeights) in pairs(modelsAndWeights)
+        model = modelAndWeights[1]
+        weights = modelAndWeights[2]
+        expectedresults = modelAndWeights[3]
+        @testset "Model: $model Weights: $weights" begin
+            new_df = DataFrame(model=model, load=false, load_time=0.0, run=false, forwardpass_time=0.0, objects_detected=0)
+            cfg_file = joinpath(pkgdir, "models", "$(model).cfg")
+            weights_file = YOLO.getArtifact(weights)
 
-@testset "Example pretrained weights files have been downloaded" begin
-    @test isfile(joinpath(
-        pretraineddir,
-        "v2_tiny",
-        "voc2007",
-        "v2_tiny_voc.weights",
-    ))
-end
+            t = @elapsed begin
+                yolomod = YOLO.Yolo(cfg_file, weights_file, 1, silent=true)
+            end
+            new_df[1, :load] = true
+            new_df[1, :load_time] = t
 
-
-@testset "Loading and running YOLOv2_tiny_voc pretrained model" begin
-
-    num_images = 2
-
-    voc = YOLO.datasets.VOC.populate()
-    @test length(voc.image_paths) == 5011
-    @test length(voc.label_paths) == 5011
-    @test length(voc.objects) == 20
-
-    settings = YOLO.pretrained.v2_tiny_voc.load(minibatch_size = num_images)
-    @test settings.num_classes == 20
-
-    vocloaded = YOLO.load(voc, settings, indexes = collect(1:num_images))
-    @test size(vocloaded.imstack_mat) == (416, 416, 3, num_images)
-    @test length(vocloaded.paddings) == num_images
-    @test length(vocloaded.labels) == num_images
-    #Checks that the VOC download hasn't changed
-    @test vec(sum(vocloaded.imstack_mat, dims = (1, 2, 3))) ≈ [
-        140752.47,
-        122024.16,
-        126477.125,
-        114651.555,
-        143701.72,
-        196821.47,
-        179382.5,
-        83476.43,
-        132382.72,
-        166430.16,
-    ][1:num_images]
-
-    model = YOLO.v2_tiny.load(settings)
-    YOLO.loadWeights!(model, settings)
-
-    res = model(vocloaded.imstack_mat) #run once to deal with compillation overhead
-    #accdata = minibatch(inp, out, settings.minibatch_size; xtype = xtype)
-
-    t = @elapsed for i in 1:10
-        model(vocloaded.imstack_mat)
+            IMG_for_model = prepareimage(IMG, yolomod.cfg[:width], yolomod.cfg[:height])
+            res = yolomod(IMG_for_model)
+            t = @belapsed $yolomod($IMG_for_model);
+            new_df[1, :run] = true
+            new_df[1, :forwardpass_time] = t
+            new_df[1, :objects_detected] = size(res,2)
+            @test size(res,2) == expectedresults
+            append!(df, new_df)
+        end
+        GC.gc()
     end
-
-    inference_time = (t / 10) / num_images
-    inference_rate = 1 / inference_time
-
-    predictions = YOLO.postprocess(res, settings, conf_thresh = 0.3, iou_thresh = 0.3)
-    @test length(predictions) == num_images # images
-    @test length(predictions[1]) == 0
-    @test length(predictions[2]) == 1
-
-    @test isapprox(predictions[2][1].bbox.x, 0.23406872f0, rtol=0.05)
-    @test isapprox(predictions[2][1].bbox.y, 0.28794688f0, rtol=0.05)
-    @test isapprox(predictions[2][1].bbox.w, 0.8048826f0, rtol=0.05)
-    @test isapprox(predictions[2][1].bbox.h, 0.46979588f0, rtol=0.05)
-    @test predictions[2][1].class == 7
-    @test isapprox(predictions[2][1].conf, 0.5042128f0, rtol=0.05)
-
-    t = @elapsed for i in 1:10
-        YOLO.postprocess(res, settings, conf_thresh = 0.3, iou_thresh = 0.3)
-    end
-
-    postprocess_time = (t / 10) / num_images
-    postprocess_rate = 1 / postprocess_time
-
-    ## Makie Tests
-    #disabled because Makie can't be tested on headless CI
-    # scene = YOLO.renderResult(vocloaded.imstack_mat[:,:,:,1], predictions[1], settings, save_file = "test.png")
-    # @test isfile("test.png")
-    # rm("test.png", force=true)
-
-    enable_info()
-    @info "YOLO_v2_tiny inference time per image: $(round(inference_time, digits=4)) seconds ($(round(inference_rate, digits=2)) fps)"
-    @info "YOLO_v2_tiny postprocess time per image: $(round(postprocess_time, digits=4)) seconds ($(round(postprocess_rate, digits=2)) fps)"
-    @info "Total time per image: $(round(inference_time + postprocess_time, digits=4)) seconds ($(round(1/(inference_time + postprocess_time), digits=2)) fps)"
-
+    display(df)
 end

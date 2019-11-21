@@ -1,0 +1,39 @@
+[yolov2-COCO]
+git-tree-sha1 = "c5f4d31e5c9c5d6fba7469ceff3d9916050d92d2"
+lazy = true
+
+    [[yolov2-COCO.download]]
+    sha256 = "4cf00217dd6b7580e29cb56d69d558df4862832b4c36f9ce00c0ef525581f5a7"
+    url = "https://github.com/ianshmean/YOLO.jl.git/releases/download/weights/yolov2-COCO.tar.gz"
+
+[yolov2-tiny-COCO]
+git-tree-sha1 = "938cb0829a7a92b650e4552042a6ba45de542dc8"
+lazy = true
+
+    [[yolov2-tiny-COCO.download]]
+    sha256 = "743173108dcdeff68aa2ebcd411a7dd667a3ac43b5d74a7bf59f90d8fec47b24"
+    url = "https://github.com/ianshmean/YOLO.jl.git/releases/download/weights/yolov2-tiny-COCO.tar.gz"
+
+[yolov3-COCO]
+git-tree-sha1 = "9c3cfcb6f671eeec6efd9b1f87d6dd33a5373ec3"
+lazy = true
+
+    [[yolov3-COCO.download]]
+    sha256 = "5d9184cc499f07060719ae1398dca62d91a0626bf0efd20b1fae67bfc8d246f4"
+    url = "https://github.com/ianshmean/YOLO.jl.git/releases/download/weights/yolov3-COCO.tar.gz"
+
+[yolov3-spp-COCO]
+git-tree-sha1 = "c65c83be12182eb27ed883d2f165fa6b6b704616"
+lazy = true
+
+    [[yolov3-spp-COCO.download]]
+    sha256 = "01929d1656e88e8832b357c4960b07c3de47a436b9515f82d13083744cda6334"
+    url = "https://github.com/ianshmean/YOLO.jl.git/releases/download/weights/yolov3-spp-COCO.tar.gz"
+
+[yolov3-tiny-COCO]
+git-tree-sha1 = "dea5741f967df8650dfca0ee7f6ac70fc4a9898b"
+lazy = true
+
+    [[yolov3-tiny-COCO.download]]
+    sha256 = "0d5a517d801472a9207050f2cd4aee440dcadeb1b7aa10137b3595bf767b4b8f"
+    url = "https://github.com/ianshmean/YOLO.jl.git/releases/download/weights/yolov3-tiny-COCO.tar.gz"
