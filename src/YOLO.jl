@@ -1,22 +1,20 @@
 module YOLO
-export Yolo
 # Largely based on Robert Luciani's IMPLEMENTATION OF YOLO: https://github.com/r3tex/ObjectDetector.jl
 
-using CUDAnative
-using CuArrays
-CuArrays.allowscalar(false)
+using Flux
+using Flux.CuArrays
+using Flux.CuArrays.CUDAnative
+using Pkg.Artifacts
 
+export Yolo
+
+CuArrays.allowscalar(false)
 CuFunctional = CUDAnative.functional()
 
 # Use different generators depending on presence of GPU
 onegen = CuFunctional ? CuArrays.ones : ones
 zerogen = CuFunctional ? CuArrays.zeros : zeros
 
-using Flux
-import Flux.gpu
-export gpu
-
-using Pkg.Artifacts
 getArtifact(name::String) = joinpath(@artifact_str(name), "$(name).weights")
 
 
@@ -444,7 +442,8 @@ function kern_genbools(input::CuDeviceArray, output::CuDeviceArray)
     end
     return
 end
-@inline function kern_keepdetections(input::CuDeviceArray, output::CuDeviceArray, bools::CuDeviceArray, idxs::CuDeviceArray)
+@inline function kern_keepdetections(input::CuDeviceArray, output::CuDeviceArray,
+    bools::CuDeviceArray, idxs::CuDeviceArray)
     col = blockIdx().x
     row = threadIdx().x
     if bools[col] == Int32(1)
