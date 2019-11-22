@@ -37,24 +37,28 @@ using YOLO
 
 mod = YOLO.v3_tiny_416_COCO()
 
-batch = YOLO.emptybatch(mod)
+batch = YOLO.emptybatch(mod) # Create a batch object. Automatically uses the GPU if available
 
 img = load(joinpath(dirname(dirname(pathof(YOLO))),"test","images","dog-cycle-car.png"))
-batch[:,:,:,1] .= YOLO.gpu(resizePadImage(img, mod))
 
-res = mod(batch)
+batch[:,:,:,1] .= YOLO.gpu(resizePadImage(img, mod)) # Send resized image to the batch
+
+res = mod(batch) # Run the model on the length-1 batch
 ```
 
 ## Pretrained Models
 Most of the darknet models that are pretrained on the COCO dataset are available:
 ```julia
-    YOLO.v2_608_COCO()
-    YOLO.v2_tiny_416_COCO()
-    YOLO.v3_320_COCO()
-    YOLO.v3_416_COCO()
-    YOLO.v3_608_COCO()
-    YOLO.v3_608_spp_COCO()
-    YOLO.v3_tiny_416_COCO()
+YOLO.v2_tiny_416_COCO()
+YOLO.v3_320_COCO()
+YOLO.v3_416_COCO()
+YOLO.v3_608_COCO()
+YOLO.v3_tiny_416_COCO()
+```
+The following are available but do not load due to bugs (work in progress)
+```julia
+YOLO.v2_608_COCO()
+YOLO.v3_608_spp_COCO()
 ```
 
 Or custom models can be loaded with:
