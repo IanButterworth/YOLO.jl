@@ -14,7 +14,6 @@ Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 julia = "1.3"
 
 [extras]
-BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 ImageCore = "a09fc81d-aa75-5fe9-8630-4744c3626534"
@@ -25,4 +24,4 @@ QuartzImageIO = "dca85d43-d64c-5e67-8c65-017450d5d020"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["BenchmarkTools", "DataFrames", "FileIO", "ImageCore", "ImageMagick", "ImageTransformations", "Pkg", "QuartzImageIO", "Test"]
+test = ["DataFrames", "FileIO", "ImageCore", "ImageMagick", "ImageTransformations", "Pkg", "QuartzImageIO", "Test"]

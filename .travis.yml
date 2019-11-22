@@ -10,6 +10,9 @@ arch:
 julia:
   - 1.3
   - nightly
+env:
+  matrix:
+    - JULIA_NUM_THREADS=4
 matrix:
   allow_failures:
     - julia: nightly
