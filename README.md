@@ -75,6 +75,25 @@ v2_608_COCO(;batch=1, silent=false) = Yolo(joinpath(models_dir,"yolov2-608.cfg")
 The weights are stored as lazily-loaded julia artifacts.
 
 
+## Benchmarking
+
+Benchmarking of the pretrained models can be done with
+```julia
+YOLO.benchmark()
+```
+By default, 3 models are run through and then the list is reversed.
+```
+┌──────────────────┬─────────┬───────────────┬──────┬──────────────┬──────────────────┐
+│            Model │ loaded? │ load time (s) │ ran? │ run time (s) │ objects detected │
+├──────────────────┼─────────┼───────────────┼──────┼──────────────┼──────────────────┤
+│ v2_tiny_416_COCO │    true │        20.491 │ true │       0.0037 │                1 │
+│ v3_tiny_416_COCO │    true │         2.678 │ true │       0.0041 │                1 │
+│      v3_320_COCO │    true │         3.916 │ true │       0.0199 │                2 │
+│      v3_320_COCO │    true │         1.263 │ true │       0.0201 │                2 │
+│ v3_tiny_416_COCO │    true │         0.197 │ true │       0.0041 │                1 │
+│ v2_tiny_416_COCO │    true │          0.13 │ true │       0.0037 │                1 │
+└──────────────────┴─────────┴───────────────┴──────┴──────────────┴──────────────────┘
+```
 [discourse-tag-url]: https://discourse.julialang.org/tags/yolo
 
 [travis-img]: https://travis-ci.com/ianshmean/YOLO.jl.svg?branch=master

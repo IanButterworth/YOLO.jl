@@ -18,7 +18,7 @@ createcountdict(dict::Dict) = Dict(map(x->(x,0),collect(keys(dict))))
 
 emptybatch(mod::Yolo) = Flux.gpu(Array{Float32}(undef, mod.cfg[:width], mod.cfg[:height], mod.cfg[:channels], mod.cfg[:batchsize]))
 
-function benchmark(;select = [1,3,4])
+function benchmark(;select = [1,3,4], reverseAfter=true)
     pretrained_list = [
                         YOLO.v2_tiny_416_COCO,
                         YOLO.v2_608_COCO,
@@ -28,6 +28,8 @@ function benchmark(;select = [1,3,4])
                         YOLO.v3_608_COCO,
                         YOLO.v3_608_spp_COCO
                         ][select]
+
+    reverseAfter && (pretrained_list = vcat(pretrained_list, reverse(pretrained_list)))
 
     IMG = rand(RGB,416,416)
 
