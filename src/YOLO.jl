@@ -16,12 +16,13 @@ using ImageFiltering
 using ImageTransformations
 using ImageCore
 
+using BenchmarkTools
+using PrettyTables
+
 include("core.jl")
 include("pretrained.jl")
 
 include("prepareimage.jl")
 include("utils.jl")
-
-mod = v2_tiny_416_COCO(silent=true)
 
 end #module

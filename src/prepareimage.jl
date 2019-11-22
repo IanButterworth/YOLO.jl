@@ -80,7 +80,7 @@ function resizePadImage(img::Array{T}, target_img::Array{U}, kern) where {T<:Ima
     if size(img,1) > size(target_img, 1) #Apply blur first if reducing size, to avoid aliasing
         imgr = ImageTransformations.imresize(ImageFiltering.imfilter(img, kern, NA()), target_img_size[1:2])
         target_img[vindex, hindex, :] .= permutedims(Float32.(channelview(imgr)), [3,2,1])[:,:,1:size(target_img,3)]
-    elseif size(img,1) > size(target_img, 1)
+    elseif size(img,1) < size(target_img, 1)
         imgr = ImageTransformations.imresize(img, target_img_size[1:2])
         target_img[vindex, hindex, :] .= permutedims(Float32.(channelview(imgr)), [3,2,1])[:,:,1:size(target_img,3)]
     else
