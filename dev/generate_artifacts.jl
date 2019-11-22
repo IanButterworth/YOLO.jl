@@ -21,8 +21,8 @@ if deploy
     # Try to detect where we should upload these weights to (or just override
     # as shown in the commented-out line)
     origin_url = get_git_remote_url(dirname(@__DIR__))
-    deploy_repo = "$(basename(dirname(origin_url)))/$(basename(origin_url))"
-    @show deploy_repo
+    deploy_repo = "$(basename(dirname(origin_url)))/$(splitext(basename(origin_url))[1])"
+
     #deploy_repo = "staticfloat/ObjectDetector.jl"
     tag = "weights"
 end
@@ -55,7 +55,7 @@ if deploy
     # Upload tarballs to a special github release
     @info("Uploading tarballs to $(deploy_repo) tag `$(tag)`")
     ghr() do ghr_exe
-        run(`$ghr_exe -replace -u $(dirname(deploy_repo)) -r $(splitext(basename(deploy_repo))[1]) $(tag) $(tempdir)`)
+        run(`$ghr_exe -replace -u $(dirname(deploy_repo)) -r $(basename(deploy_repo)) $(tag) $(tempdir)`)
     end
 
     @info("Artifacts.toml file now contains all bound artifact names")
