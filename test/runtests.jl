@@ -11,8 +11,8 @@ modelsAndWeights = [
                 #("yolov2-608", "yolov2-COCO", 0),
                 ("yolov3-tiny", "yolov3-tiny-COCO", 2),
                 ("yolov3-320", "yolov3-COCO", 1),
-                ("yolov3-416", "yolov3-COCO", 3),
-                ("yolov3-608", "yolov3-COCO", 1),
+                #("yolov3-416", "yolov3-COCO", 3),
+                #("yolov3-608", "yolov3-COCO", 1),
                 #("yolov3-spp", "yolov3-spp-COCO", 0)
                 ]
 IMG = load(joinpath(@__DIR__,"images","dog-cycle-car.png"))
