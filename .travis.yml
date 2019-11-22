@@ -18,8 +18,8 @@ matrix:
     - julia: nightly
   fast_finish: true
   exclude:
-    - os: osx
-      arch: x86
+    # - os: osx
+    #   arch: x86
     - os: osx
       arch: arm64
     - os: windows
