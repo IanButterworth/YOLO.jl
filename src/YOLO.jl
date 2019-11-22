@@ -2,8 +2,8 @@ module YOLO
 # Largely based on Robert Luciani's IMPLEMENTATION OF YOLO: https://github.com/r3tex/ObjectDetector.jl
 
 using Flux
-using Flux.CuArrays
-using Flux.CuArrays.CUDAnative
+using CuArrays
+using CUDAnative
 using Pkg.Artifacts
 
 export Yolo

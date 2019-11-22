@@ -4,6 +4,8 @@ authors = ["Ian Butterworth <i.r.butterworth@gmail.com>", "Yavuz Faruk Bakman"]
 version = "0.1.0"
 
 [deps]
+CUDAnative = "be33ccc6-a3ff-5ff2-a52e-74243cff1e17"
+CuArrays = "3a865a2d-5b23-5a0f-bc46-62713ec82fae"
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
 Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 
