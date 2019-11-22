@@ -1,5 +1,8 @@
-download_artifact("c5f4d31e5c9c5d6fba7469ceff3d9916050d92d2", "https://github.com/ianshmean/YOLO.jl.git/releases/download/weights/yolov2-COCO.tar.gz", "4cf00217dd6b7580e29cb56d69d558df4862832b4c36f9ce00c0ef525581f5a7"; verbose=true)
+using Pkg.Artifacts
 
+@show download_artifact(Base.SHA1("c5f4d31e5c9c5d6fba7469ceff3d9916050d92d2"),
+"https://github.com/ianshmean/YOLO.jl.git/releases/download/weights/yolov2-COCO.tar.gz",
+"4cf00217dd6b7580e29cb56d69d558df4862832b4c36f9ce00c0ef525581f5a7"; verbose=true)
 #
 # using YOLO
 # using Test, BenchmarkTools, DataFrames
