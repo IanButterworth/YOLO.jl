@@ -20,8 +20,6 @@ using Pkg.Artifacts
 getArtifact(name::String) = joinpath(@artifact_str(name), "$(name).weights")
 
 
-
-
 #########################################################
 ##### FUNCTIONS FOR PARSING CONFIG AND WEIGHT FILES #####
 #########################################################
@@ -119,7 +117,7 @@ prettyprint(str, col) = for (s, c) in zip(str, col) printstyled(s, color=c) end
 """
     flip(x)
 Flip weights to make crosscorelation kernels work using convolution filters
-This is only run once when wheights are loaded
+This is only run once when weights are loaded
 """
 flip(x) = x[end:-1:1, end:-1:1, :, :]
 
@@ -145,6 +143,19 @@ function upsample(a, stride)
     ar = reshape(a, (1, m1, 1, n1, o1, p1))
     b = onegen(Float32, stride, 1, stride, 1, 1, 1)
     return reshape(ar .* b, (m1 * stride, n1 * stride, o1, p1))
+end
+
+"""
+    reorg(a, stride)
+
+Reshapes feature map - decreases size and increases number of channels, without
+changing elements. stride=2 mean that width and height will be decreased by 2
+times, and number of channels will be increased by 2x2 = 4 times, so the total
+number of element will still the same: width_old*height_old*channels_old = width_new*height_new*channels_new
+"""
+function reorg(a, stride)
+    w, h, c = size(a)
+    return reshape(a, (w/stride, h/stride, c*(stride^2)))
 end
 
 # Use this dict to translate the config activation names to function names
@@ -203,6 +214,11 @@ mutable struct Yolo
                 push!(fn, x -> upsample(x, stride)) # upsample using Kronecker tensor product
                 push!(ch, ch[end])
                 !silent && prettyprint(["($(length(fn))) ","upsample($stride)"," => "],[:blue,:magenta,:green])
+            elseif blocktype == :reorg
+                stride = block[:stride]
+                push!(fn, x -> reorg(x, stride)) # reorg (reshape to (w/stride, h/stride, c*stride^2))
+                push!(ch, ch[end])
+                !silent && prettyprint(["($(length(fn))) ","reorg($stride)"," => "],[:blue,:magenta,:green])
             elseif blocktype == :maxpool
                 siz = block[:size]
                 stride = block[:stride] # use our custom stride function if size is 1
@@ -211,12 +227,12 @@ mutable struct Yolo
                 !silent && prettyprint(["($(length(fn))) ","maxpool($siz,$stride)"," => "],[:blue,:magenta,:green])
             # for these layers don't push a function to fn, just note the skip-type and where to skip from
             elseif blocktype == :route
-                idx1 = block[:layers][1] + length(fn)+1
+                idx1 = length(fn) + block[:layers][1] + 1
                 if length(block[:layers]) > 1
                     if block[:layers][2] > 0
                         idx2 = block[:layers][2] + 1
                     else
-                        idx2 = length(fn) + block[:layers][2] # Handle -ve route selections
+                        idx2 = length(fn) + block[:layers][2] + 1 # Handle -ve route selections
                     end
                     push!(ch, ch[idx1] + ch[idx2])
                     push!(fn, (idx2, :cat)) # cat two layers along the channel dim
