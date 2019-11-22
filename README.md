@@ -1,8 +1,7 @@
 # YOLO.jl
 
-Currently only supports loading [YOLOv2-tiny](https://github.com/pjreddie/darknet/blob/master/cfg/yolov2-tiny.cfg) and the [VOC-2007](http://host.robots.ox.ac.uk/pascal/VOC/voc2007/) pretrained model (pretrained on [Darknet](https://pjreddie.com/darknet/)).
-
-The majority of this is made possible by Yavuz Bakman's great work in https://github.com/Ybakman/YoloV2
+YOLO object detection natively in Julia, through loading Darknet .cfg and .weights files as Flux models.
+Core functionality based on https://github.com/r3tex/ObjectDetector.jl
 
 <p float="left">
 <img src="examples/boat.png" alt="drawing" width="200"/>
@@ -20,6 +19,8 @@ See below for examples or ask questions on [![Join the julia slack](https://img.
 
 ## Installation
 
+Requires julia v1.3+
+
 The package can be installed with the Julia package manager.
 From the Julia REPL, type `]` to enter the Pkg REPL mode and run:
 
@@ -30,7 +31,7 @@ pkg> add YOLO
 
 ## Example Usage (WIP)
 
-### Testing a dataset
+### Loading and running on an image
 ```julia
 using YOLO
 
@@ -42,8 +43,32 @@ img = load(joinpath(dirname(dirname(pathof(YOLO))),"test","images","dog-cycle-ca
 batch[:,:,:,1] .= YOLO.gpu(resizePadImage(img, mod))
 
 res = mod(batch)
-
 ```
+
+## Pretrained Models
+Most of the darknet models that are pretrained on the COCO dataset are available:
+```julia
+    YOLO.v2_608_COCO()
+    YOLO.v2_tiny_416_COCO()
+    YOLO.v3_320_COCO()
+    YOLO.v3_416_COCO()
+    YOLO.v3_608_COCO()
+    YOLO.v3_608_spp_COCO()
+    YOLO.v3_tiny_416_COCO()
+```
+
+Or custom models can be loaded with:
+```julia
+Yolo("path/to/model.cfg", "path/to/weights.weights", 1)
+```
+where `1` is the batch size.
+
+For instance the pretrained models are defined as:
+```julia
+v2_608_COCO(;batch=1, silent=false) = Yolo(joinpath(models_dir,"yolov2-608.cfg"), getArtifact("yolov2-COCO"), batch, silent=silent)
+```
+
+The weights are stored as lazily-loaded julia artifacts.
 
 
 [discourse-tag-url]: https://discourse.julialang.org/tags/yolo
