@@ -1,7 +1,6 @@
-const models_dir = joinpath(@__DIR__,"models")
-const data_dir = joinpath(@__DIR__,"..","data")
-const datasets_dir = joinpath(data_dir,"datasets")
-const pretrained_dir = joinpath(data_dir,"pretrained")
+const models_dir = joinpath(dirname(@__DIR__), "models")
+
+getArtifact(name::String) = joinpath(@artifact_str(name), "$(name).weights")
 
 """
     flipdict(dict::Dict)
@@ -17,9 +16,4 @@ Create a dict copy of namesdict, for counting the occurances of each named objec
 """
 createcountdict(dict::Dict) = Dict(map(x->(x,0),collect(keys(dict))))
 
-"""
-    sigmoid(x)
-
-Standard sigmoid.
-"""
-sigmoid(x) = 1.0 / (1.0 .+ exp(-x))
+emptybatch(mod::Yolo) = Flux.gpu(Array{Float32}(undef, mod.cfg[:width], mod.cfg[:height], mod.cfg[:channels], mod.cfg[:batchsize]))
