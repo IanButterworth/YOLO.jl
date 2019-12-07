@@ -2,7 +2,11 @@
 
 Currently only supports loading [YOLOv2-tiny](https://github.com/pjreddie/darknet/blob/master/cfg/yolov2-tiny.cfg) and the [VOC-2007](http://host.robots.ox.ac.uk/pascal/VOC/voc2007/) pretrained model (pretrained on [Darknet](https://pjreddie.com/darknet/)).
 
-The majority of this is made possible by Yavuz Bakman's great work in https://github.com/Ybakman/YoloV2
+Made possible by Yavuz Bakman's [YoloV2](https://github.com/Ybakman/YoloV2)
+
+Consider also checking out:
+- [ObjectDetector.jl](https://github.com/r3tex/ObjectDetector.jl) -> A Flux-based implementation of YOLO (testing only)
+- [Darknet.jl](https://github.com/ianshmean/Darknet.jl) -> A julia wrapper of AlexeyAB's fork of Darknet (testing only)
 
 <p float="left">
 <img src="examples/boat.png" alt="drawing" width="200"/>
