@@ -31,7 +31,7 @@ The package can be installed with the Julia package manager.
 From the Julia REPL, type `]` to enter the Pkg REPL mode and run:
 
 ```
-pkg> add YOLO
+pkg> add https://github.com/iuliancioarca/YOLO.jl.git
 ```
 If you have a CUDA-supported graphics card, make sure that you have CUDA set up such that it satisfies [CUDAapi.jl](https://github.com/JuliaGPU/CUDAapi.jl) or [CuArrays.jl](https://github.com/JuliaGPU/CuArrays.jl) builds.
 
