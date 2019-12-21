@@ -2,6 +2,7 @@
 # Forked from https://github.com/ianshmean/YOLO.jl
 Full credits go to https://github.com/ianshmean and https://github.com/Ybakman. This copy is used for experimenting with YOLOv2 reorg and concat layers, as well as loss function definition.
 
+* Update: ported YOLOv2 loss function from https://fairyonice.github.io/Part_4_Object_Detection_with_Yolo_using_VOC_2012_data_loss.html. Comparable results with the TF implementation, but tested only on dummay arrays. Need to load annotations and test more.
 * Update: Loading YOLOv2-VOC (https://github.com/pjreddie/darknet/blob/master/cfg/yolov2-voc.cfg) is now possible along with the pretrained weights. Please check the example below for using the model.
 * Loading [YOLOv2-tiny](https://github.com/pjreddie/darknet/blob/master/cfg/yolov2-tiny.cfg) and the [VOC-2007](http://host.robots.ox.ac.uk/pascal/VOC/voc2007/) pretrained model (pretrained on [Darknet](https://pjreddie.com/darknet/)) is possible.
 
@@ -62,6 +63,7 @@ vocloaded = YOLO.load(voc, settings, indexes = [100]) #load image #100 (a single
 
 #Run the model
 res = model(vocloaded.imstack_mat);
+res4loss = reshape(res,13, 13, 5, 4 + 1 + 20,2) # this had 5 bboxes. will be useful for loss function
 
 #Convert the output into readable predictions
 predictions = YOLO.postprocess(res, settings, conf_thresh = 0.3, iou_thresh = 0.3)
@@ -88,6 +90,8 @@ YOLO.loadWeights!(model, settings, nr_constants)
 ## Run for each image
 imgmat = YOLO.loadResizePadImageToFit("image.jpeg", settings)
 res = model(imgmat)
+res4loss = reshape(res,13, 13, 5, 4 + 1 + 20,2) # this had 5 bboxes. will be useful for loss function
+
 predictions = YOLO.postprocess(res, settings, conf_thresh = 0.3, iou_thresh = 0.3)
 ```
 
@@ -100,6 +104,7 @@ img2 = Float32.(channelview(img1));
 img3 = permutedims(img2,[2,3,1]);
 imgmat = reshape(img3,size(img3)...,1);
 @time res = model(imgmat);
+res4loss = reshape(res,13, 13, 5, 4 + 1 + 20,2) # this had 5 bboxes. will be useful for loss function
 predictions = YOLO.postprocess(res, settings, conf_thresh = 0.3, iou_thresh = 0.3);
 scene = YOLO.renderResult(img3, predictions, settings, save_file = "test.png");
 display(scene)
