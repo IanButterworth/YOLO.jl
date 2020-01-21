@@ -1,4 +1,4 @@
-smodule YOLO
+module YOLO
 include("common.jl")
 !isfile(joinpath(pretrained_dir,"v2_tiny","voc2007","v2_tiny_voc.weights")) && @error "YOLO has build errors. Re-run `]build YOLO`"
 
