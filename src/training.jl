@@ -1,5 +1,4 @@
 
-
 function train(sets::Settings; epochs = 25, lr = 1e-4, numberofimages = 500)
     model = YOLO.v2_tiny.load(sets)
     YOLO.loadWeights!(model, sets)
