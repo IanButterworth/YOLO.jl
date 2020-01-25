@@ -21,6 +21,7 @@ QuartzImageIO = "dca85d43-d64c-5e67-8c65-017450d5d020"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Requires = "ae029012-a4dd-5104-9daa-d747884805df"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
+IterTools = "c8e1da08-722c-5040-9ed9-7db0dc04731e"
 
 [compat]
 Knet = "≥ 1.2.7"
