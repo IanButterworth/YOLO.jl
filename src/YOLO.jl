@@ -4,14 +4,14 @@ include("common.jl")
 
 @static Sys.isapple() && using QuartzImageIO
 using FileIO, ImageMagick
-using Knet: Knet, progress, progress!, gpu, KnetArray, relu, minibatch, conv4, pool, softmax
+using Knet: Knet, progress, progress!, gpu, KnetArray, relu, minibatch, conv4, pool, softmax,Param,adam
 using Random, DelimitedFiles, OffsetArrays
 using ImageFiltering, ImageTransformations, Colors, ImageCore
 using LightXML
 import ProgressMeter
 using GeometryTypes
 using Requires
-
+using IterTools
 
 
 const GPU = Knet.gpu()
