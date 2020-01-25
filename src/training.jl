@@ -1,5 +1,6 @@
 using Knet:Param,adam
 using IterTools
+
 function train(sets::Settings; epochs = 25, lr = 1e-4, numberofimages = 500)
     model = YOLO.v2_tiny.load(sets)
     YOLO.loadWeights!(model, sets)
@@ -8,20 +9,16 @@ function train(sets::Settings; epochs = 25, lr = 1e-4, numberofimages = 500)
     model.layers[16].b = xtype(randn(Float32,1,1,sets.cell_bboxes * (5 + sets.num_classes),1)/(sets.grid_x*sets.grid_y))
     model.layers[16].w = Param(model.layers[16].w)
     model.layers[16].b = Param(model.layers[16].b)
-
     voc = YOLO.datasets.VOC.populate()
-    global xtype = Array{Float32}
     vocloaded = YOLO.load(voc, sets, indexes = Vector(1:numberofimages)) ## create according to image number
-    global xtype = (GPU >= 0 ? Knet.KnetArray{Float32} : Array{Float32})
     y_batch,b_batch= prepbatches(vocloaded.labels,sets)
     y_batch = reshape(y_batch,13*13*5*25,:)
     b_batch = reshape(b_batch,50*4,:)
     total_batch = vcat(b_batch,y_batch)
+    #minibatch and training
     dtrn = minibatch(vocloaded.imstack_mat,total_batch,sets.minibatch_size; xtype = xtype, ytype = xtype, shuffle=true,partial = true)
     optimizer = adam(model,ncycle(dtrn,epochs);lr=lr, beta1=0.9, beta2=0.999, eps=1e-8)
     progress!(optimizer)
-
-    ## return trained model
     return model
 end
 
@@ -57,7 +54,6 @@ function prepbatches(labels::Vector{Vector{TruthLabel}},sets::Settings)
     return cat(total...,dims=5),cat(btotal...,dims=6)
 end
 
-#Aynı yere birden fazla atama olabilir
 function fillLocation!(arr,x,y,w,h,classNo,cx,cy,settings)
     ious = Array{Float32,1}()
     for i in 1:length(settings.anchors) # Find best iou match and fill only this part of array

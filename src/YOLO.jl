@@ -15,7 +15,7 @@ using Requires
 
 
 const GPU = Knet.gpu()
-xtype = (GPU >= 0 ? Knet.KnetArray{Float32} : Array{Float32})#if gpu exists run on gpu
+const xtype = (GPU >= 0 ? Knet.KnetArray{Float32} : Array{Float32})#if gpu exists run on gpu
 
 Base.@kwdef mutable struct BBOX
     x::Float32 #Left hand edge in scaled image width unnits (0-1)
