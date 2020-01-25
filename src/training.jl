@@ -1,24 +1,55 @@
+using Knet:Param,adam
+using IterTools
+function train(sets::Settings; epochs = 25, lr = 1e-4, numberofimages = 500)
+    model = YOLO.v2_tiny.load(sets)
+    YOLO.loadWeights!(model, sets)
+    ##make last layer random and param
+    model.layers[16].w = xtype(randn(Float32,1, 1, 1024, sets.cell_bboxes * (5 + sets.num_classes))/(sets.grid_x*sets.grid_y))
+    model.layers[16].b = xtype(randn(Float32,1,1,sets.cell_bboxes * (5 + sets.num_classes),1)/(sets.grid_x*sets.grid_y))
+    model.layers[16].w = Param(model.layers[16].w)
+    model.layers[16].b = Param(model.layers[16].b)
+
+    voc = YOLO.datasets.VOC.populate()
+    global xtype = Array{Float32}
+    vocloaded = YOLO.load(voc, sets, indexes = Vector(1:numberofimages)) ## create according to image number
+    global xtype = (GPU >= 0 ? Knet.KnetArray{Float32} : Array{Float32})
+    y_batch,b_batch= prepbatches(vocloaded.labels,sets)
+    y_batch = reshape(y_batch,13*13*5*25,:)
+    b_batch = reshape(b_batch,50*4,:)
+    total_batch = vcat(b_batch,y_batch)
+    dtrn = minibatch(vocloaded.imstack_mat,total_batch,sets.minibatch_size; xtype = xtype, ytype = xtype, shuffle=true,partial = true)
+    optimizer = adam(model,ncycle(dtrn,epochs);lr=lr, beta1=0.9, beta2=0.999, eps=1e-8)
+    progress!(optimizer)
+
+    ## return trained model
+    return model
+end
+
+
+
+
+
 #Create Y_batch and b_batch
-function prepbatches(out)
+function prepbatches(labels::Vector{Vector{TruthLabel}},sets::Settings)
     total = Array{Array{Float32,4},1}()
     btotal = Array{Array{Float32,5},1}()
-    # her seferinde hazırla sonra totale koy onu da catle return et
-    for i in 1:length(out)
+    for i in 1:length(labels)
         onedim = zeros(Float32,13,13,5,25)
         onedimb = zeros(Float32,1,1,1,50,4)
-        for k in 3:length(out[i])
-            x = out[i][k][1] / 32   #Sanki 13*13 pixelmiş gibi davran
-            y = out[i][k][2] / 32
-            w = out[i][k][3] / 32
-            h = out[i][k][4] / 32
-            classNo = namesdic[out[i][k][5]]
+        for k in 1:length(labels[i])
+            rate =  sets.grid_x
+            x = labels[i][k].bbox.x * rate
+            y = labels[i][k].bbox.y * rate
+            w = labels[i][k].bbox.w * rate
+            h = labels[i][k].bbox.h * rate
+            classNo = labels[i][k].class
             cx = Int32(floor(x+w/2)) + 1
             cy = Int32(floor(y+h/2)) + 1
-            fillLocation!(onedim,x,y,w,h,classNo,cx,cy)
-            onedimb[1,1,1,k-2,1] = x + w/2
-            onedimb[1,1,1,k-2,2] = y + h/2
-            onedimb[1,1,1,k-2,3] = w
-            onedimb[1,1,1,k-2,4] = h
+            fillLocation!(onedim,x,y,w,h,classNo,cx,cy,sets)
+            onedimb[1,1,1,k,1] = x + w/2
+            onedimb[1,1,1,k,2] = y + h/2
+            onedimb[1,1,1,k,3] = w
+            onedimb[1,1,1,k,4] = h
         end
         push!(total,onedim)
         push!(btotal,onedimb)
@@ -27,10 +58,10 @@ function prepbatches(out)
 end
 
 #Aynı yere birden fazla atama olabilir
-function fillLocation!(arr,x,y,w,h,classNo,cx,cy)
+function fillLocation!(arr,x,y,w,h,classNo,cx,cy,settings)
     ious = Array{Float32,1}()
-    for i in 1:length(anchors) # Find best iou match and fill only this part of array
-        res = ioumatch(0,0,anchors[i][1],anchors[i][2],0,0,w,h)
+    for i in 1:length(settings.anchors) # Find best iou match and fill only this part of array
+        res = ioumatch(0,0,settings.anchors[i][1],settings.anchors[i][2],0,0,w,h)
         push!(ious,res)
     end
     loc = argmax(ious)

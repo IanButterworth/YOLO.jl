@@ -15,7 +15,7 @@ using Requires
 
 
 const GPU = Knet.gpu()
-const xtype = (GPU >= 0 ? Knet.KnetArray{Float32} : Array{Float32})#if gpu exists run on gpu
+xtype = (GPU >= 0 ? Knet.KnetArray{Float32} : Array{Float32})#if gpu exists run on gpu
 
 Base.@kwdef mutable struct BBOX
     x::Float32 #Left hand edge in scaled image width unnits (0-1)
@@ -74,10 +74,11 @@ end
 
 include("datasets.jl")
 include("pretrained.jl")
+include("YoloLoss.jl")
 include("models.jl")
 include("preprocess.jl")
 include("postprocess.jl")
-
+include("training.jl")
 function __init__()
     @require Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a" include("makierendering.jl")
 end

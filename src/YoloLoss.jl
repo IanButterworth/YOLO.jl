@@ -1,3 +1,11 @@
+using Knet: Knet, gpu
+typearr = (Knet.gpu() >= 0 ? Knet.KnetArray{Float32} : Array{Float32})#if gpu exists run on gpu
+ANCHORS = typearr(Array{Float32,1}([1.08, 1.19,  3.42, 4.41,  6.63, 11.38,  9.42, 5.11,  16.62, 10.52]))
+object_scale = Float32(5)
+noobject_scale= Float32(1)
+class_scale = Float32(1)
+coord_scale = Float32(1)
+square(x) = x * x
 function ioumatch(x1,y1,w1,h1,x2,y2,w2,h2)
         r1 = x1 + w1
         l1 = x1
@@ -103,7 +111,7 @@ function iou_best(pred_box_xy,pred_box_wh,b_batch)
 end
 
 function get_conf_mask(best_ious, true_box_conf, true_box_conf_IOU,LAMBDA_NO_OBJECT, LAMBDA_OBJECT)
-    if GPU
+    if GPU >=0
         conf_mask = (best_ious .< 0.6) .* (1 .- true_box_conf) .* LAMBDA_NO_OBJECT
     else
         conf_mask = Float32.(best_ious .< 0.6) .* (1 .- true_box_conf) .* LAMBDA_NO_OBJECT
@@ -119,12 +127,10 @@ function loss_conf(conf_mask,true_box_conf_IOU,pred_box_conf)
 end
 
 function yololoss(total_batch, y_pred)
-
     y_true = total_batch[201:end,:]
     y_true = reshape(y_true,13,13,5,25,:)
     b_batch = total_batch[1:200,:]
     b_batch = reshape(b_batch,1,1,1,50,4,:)
-
     #adjust prediction
     cell = getcellgrid(13,13,size(y_true)[5],5)
     pred_box_xy,pred_box_wh,pred_box_conf,pred_box_class = adjust_predictions(y_pred,cell,ANCHORS)
