@@ -1,5 +1,6 @@
 module v2_tiny
 #Tiny Yolo V2-tiny model configuration
+include("../../YoloLoss.jl")
 
 using Knet: Knet, progress, progress!, gpu, KnetArray, relu, minibatch, conv4, pool, softmax
 
@@ -9,6 +10,7 @@ mutable struct v2TinyChain
     layers
     v2TinyChain(layers...) = new(layers)
 end
+
 
 mutable struct Conv #Define convolutional layer
     w
@@ -21,7 +23,6 @@ mutable struct YoloPad #Define Yolo padding layer (assymetric padding).
     w
     grid_x::Int
     grid_y::Int
-    minibatch_size::Int
 end
 struct Pool # Define pool layer
     size
@@ -29,16 +30,16 @@ struct Pool # Define pool layer
     pad
 end
 
-YoloPad(w1::Int, w2::Int, cx::Int, cy::Int, grid_x::Int, grid_y::Int, minibatch_size::Int) =
-    YoloPad(zeros(Float32, w1, w2, cx, cy), grid_x, grid_y, minibatch_size)#Constructor for Yolopad
+YoloPad(w1::Int, w2::Int, cx::Int, cy::Int, grid_x::Int, grid_y::Int) =
+    YoloPad(zeros(Float32, w1, w2, cx, cy), grid_x, grid_y)#Constructor for Yolopad
 
 Conv(w1::Int, w2::Int, cx::Int, cy::Int, st, pd, f) =
     Conv(randn(Float32, w1, w2, cx, cy), randn(Float32, 1, 1, cy, 1), st, pd, f)#Constructor for convolutional layer
 
 #Assymetric padding function
 function (y::YoloPad)(x)
-    x = reshape(x, y.grid_x + 1, y.grid_y + 1, 1, 512 * y.minibatch_size)
-    return reshape(conv4(y.w, x; stride = 1), y.grid_x, y.grid_y, 512, y.minibatch_size)
+    x = reshape(x, y.grid_x + 1, y.grid_y + 1, 1, :)
+    return reshape(conv4(y.w, x; stride = 1), y.grid_x, y.grid_y, 512, :)
 end
 
 (p::Pool)(x) = pool(x; window = p.size, stride = p.stride, padding = p.pad) #pool function
@@ -46,6 +47,9 @@ end
 (c::v2TinyChain)(x) = (for l in c.layers #chain function
     x = l(x)
 end; x)
+
+
+(c::v2TinyChain)(x, truth) = yololoss(truth,c(x))#Array{Float32}(m(x))
 
 (c::Conv)(x) =
     c.f.(conv4(c.w, x; stride = c.stride, padding = c.padding) .+ c.b) #convolutional layer function
@@ -93,7 +97,7 @@ return v2TinyChain(
     Pool(2, 2, 0),
     Conv(3, 3, 256, 512, 1, 1, leaky),
     Pool(2, 1, 1),
-    YoloPad(2, 2, 1, 1, sets.grid_x, sets.grid_y, sets.minibatch_size),
+    YoloPad(2, 2, 1, 1, sets.grid_x, sets.grid_y),
     Conv(3, 3, 512, 1024, 1, 1, leaky),
     Conv(3, 3, 1024, 1024, 1, 1, leaky),
     Conv(1, 1, 1024, sets.cell_bboxes * (5 + sets.num_classes), 1, 0, identity),
