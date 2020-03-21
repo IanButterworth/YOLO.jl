@@ -1,6 +1,10 @@
 # YOLO.jl
+# Forked from https://github.com/ianshmean/YOLO.jl
+Full credits go to https://github.com/ianshmean and https://github.com/Ybakman. This copy is used for experimenting with YOLOv2 reorg and concat layers, as well as loss function definition.
 
-Currently only supports loading [YOLOv2-tiny](https://github.com/pjreddie/darknet/blob/master/cfg/yolov2-tiny.cfg) and the [VOC-2007](http://host.robots.ox.ac.uk/pascal/VOC/voc2007/) pretrained model (pretrained on [Darknet](https://pjreddie.com/darknet/)).
+* Update: ported YOLOv2 loss function from https://fairyonice.github.io/Part_4_Object_Detection_with_Yolo_using_VOC_2012_data_loss.html. Comparable results with the TF implementation, but tested only on dummay arrays. Need to load annotations and test more.
+* Update: Loading YOLOv2-VOC (https://github.com/pjreddie/darknet/blob/master/cfg/yolov2-voc.cfg) is now possible along with the pretrained weights. Please check the example below for using the model.
+* Loading [YOLOv2-tiny](https://github.com/pjreddie/darknet/blob/master/cfg/yolov2-tiny.cfg) and the [VOC-2007](http://host.robots.ox.ac.uk/pascal/VOC/voc2007/) pretrained model (pretrained on [Darknet](https://pjreddie.com/darknet/)) is possible.
 
 Made possible by Yavuz Bakman's [YoloV2](https://github.com/Ybakman/YoloV2)
 
@@ -32,7 +36,7 @@ The package can be installed with the Julia package manager.
 From the Julia REPL, type `]` to enter the Pkg REPL mode and run:
 
 ```
-pkg> add YOLO
+pkg> add https://github.com/iuliancioarca/YOLO.jl.git
 ```
 If you have a CUDA-supported graphics card, make sure that you have CUDA set up such that it satisfies [CUDAapi.jl](https://github.com/JuliaGPU/CUDAapi.jl) or [CuArrays.jl](https://github.com/JuliaGPU/CuArrays.jl) builds.
 
@@ -47,15 +51,23 @@ using YOLO
 #First time only (downloads 5011 images & labels!)
 YOLO.download_dataset("voc2007")
 
+# V2_tiny
 settings = YOLO.pretrained.v2_tiny_voc.load(minibatch_size=1) #run 1 image at a time
 model = YOLO.v2_tiny.load(settings)
 YOLO.loadWeights!(model, settings)
+
+# V2
+settings = YOLO.pretrained.v2_voc.load(minibatch_size=1)
+model = YOLO.v2.load(settings)
+nr_constants = 5 # nr of constants at the beginning of weights file
+YOLO.loadWeights!(model, settings, nr_constants)
 
 voc = YOLO.datasets.VOC.populate()
 vocloaded = YOLO.load(voc, settings, indexes = [100]) #load image #100 (a single image)
 
 #Run the model
 res = model(vocloaded.imstack_mat);
+res4loss = reshape(res,13, 13, 5, 4 + 1 + 20,2) # this had 5 bboxes. will be useful for loss function
 
 #Convert the output into readable predictions
 predictions = YOLO.postprocess(res, settings, conf_thresh = 0.3, iou_thresh = 0.3)
@@ -63,27 +75,43 @@ predictions = YOLO.postprocess(res, settings, conf_thresh = 0.3, iou_thresh = 0.
 
 ### Testing a single custom image
 To pass an image through, the image needs to be loaded, and scaled to the appropriate input size.
-For YOLOv2-tiny that would be `(w, h, color_channels, minibatch_size) == (416, 416, 3, 1)`.
+For YOLOv2-tiny and YOLOv2 that would be `(w, h, color_channels, minibatch_size) == (416, 416, 3, 1)`.
 
 `loadResizePadImageToFit` can be used to load, resize & pad the image, while maintaining aspect ratio and anti-aliasing during the resize process.
 ```julia
 using YOLO
-## Load once
+## Load once V2_tiny
 settings = YOLO.pretrained.v2_tiny_voc.load(minibatch_size=1) #run 1 image at a time
 model = YOLO.v2_tiny.load(settings)
 YOLO.loadWeights!(model, settings)
 
+## OR Load once V2
+settings = YOLO.pretrained.v2_voc.load(minibatch_size=1)
+model = YOLO.v2.load(settings)
+nr_constants = 5 # nr of constants at the beginning of weights file
+YOLO.loadWeights!(model, settings, nr_constants)
+
 ## Run for each image
 imgmat = YOLO.loadResizePadImageToFit("image.jpeg", settings)
 res = model(imgmat)
+res4loss = reshape(res,13, 13, 5, 4 + 1 + 20,2) # this had 5 bboxes. will be useful for loss function
+
 predictions = YOLO.postprocess(res, settings, conf_thresh = 0.3, iou_thresh = 0.3)
 ```
 
-or if the image is already in memory
+or manually resize and reshape
 ```
-imgmat = loadResizePadImageToFit(img, settings)
-res = model(imgmat)
-predictions = YOLO.postprocess(res, settings, conf_thresh = 0.3, iou_thresh = 0.3)
+using Images, Makie
+img = load("image.jpg");
+img1 = imresize(img,416,416);
+img2 = Float32.(channelview(img1));
+img3 = permutedims(img2,[2,3,1]);
+imgmat = reshape(img3,size(img3)...,1);
+@time res = model(imgmat);
+res4loss = reshape(res,13, 13, 5, 4 + 1 + 20,2) # this had 5 bboxes. will be useful for loss function
+predictions = YOLO.postprocess(res, settings, conf_thresh = 0.3, iou_thresh = 0.3);
+scene = YOLO.renderResult(img3, predictions, settings, save_file = "test.png");
+display(scene)
 ```
 
 
