@@ -1,17 +1,16 @@
 module YOLO
 include("common.jl")
 !isfile(joinpath(pretrained_dir,"v2_tiny","voc2007","v2_tiny_voc.weights")) && @error "YOLO has build errors. Re-run `]build YOLO`"
-
 @static Sys.isapple() && using QuartzImageIO
 using FileIO, ImageMagick
-using Knet: Knet, progress, progress!, gpu, KnetArray, relu, minibatch, conv4, pool, softmax
+using Knet: Knet, progress, progress!, gpu, KnetArray, relu, minibatch, conv4, pool, softmax,Param,adam
 using Random, DelimitedFiles, OffsetArrays
 using ImageFiltering, ImageTransformations, Colors, ImageCore
 using LightXML
 import ProgressMeter
 using GeometryTypes
 using Requires
-
+using IterTools
 
 
 const GPU = Knet.gpu()
@@ -74,10 +73,11 @@ end
 
 include("datasets.jl")
 include("pretrained.jl")
+include("YoloLoss.jl")
 include("models.jl")
 include("preprocess.jl")
 include("postprocess.jl")
-
+include("training.jl")
 function __init__()
     @require Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a" include("makierendering.jl")
 end

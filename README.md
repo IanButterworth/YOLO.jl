@@ -96,7 +96,14 @@ using Makie, YOLO
 scene = YOLO.renderResult(vocloaded.imstack_mat[:,:,:,1], predictions, settings, save_file = "test.png")
 display(scene)
 ```
+### Training
+Training on voc dataset. It trains only detection layer (last layer).
+```julia
 
+settings = YOLO.pretrained.v2_tiny_voc.load(minibatch_size=32) #sets minibatch size
+model = YOLO.train(settings; epochs = 30, numberofimages = 500) #specify epochs and number of elements using in training
+
+```
 
 ### Testing inference speed
 
