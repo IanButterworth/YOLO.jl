@@ -41,7 +41,7 @@ Loads layers' weights from given weights file path.
 function loadWeights!(model::v2TinyChain, settings::Settings)
     outlength = settings.cell_bboxes * (5 + settings.num_classes)
 
-    open(settings.weights_filepath, "r") do io
+    io = open(settings.weights_filepath, "r") #do io
         readconstants!(io)
         #First Conv layer
         loadconv!(model.layers[1], io, 3, 3, 3, 16)
@@ -74,7 +74,7 @@ function loadWeights!(model::v2TinyChain, settings::Settings)
             model.layers[16].b = KnetArray(model.layers[16].b)
             model.layers[13].w = KnetArray(model.layers[13].w)
         end
-    end
+    # end
 end
 
 """
